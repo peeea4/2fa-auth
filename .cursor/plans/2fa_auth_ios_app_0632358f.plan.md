@@ -16,7 +16,7 @@ todos:
     status: completed
   - id: i18n-setup
     content: Настроить i18next + expo-localization, создать файлы переводов для EN/ES/FR/RU
-    status: pending
+    status: completed
   - id: storage-service
     content: "Реализовать storage.service.ts: абстракция над expo-secure-store (секреты) и MMKV (метаданные)"
     status: pending
