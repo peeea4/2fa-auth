@@ -1,0 +1,21 @@
+{
+  "expo": {
+    "name": "2fa-auth",
+    "slug": "2fa-auth",
+    "version": "1.0.0",
+    "platforms": ["ios"],
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "bundleIdentifier": "com.ideas.twofaauth",
+      "supportsTablet": true
+    }
+  }
+}
