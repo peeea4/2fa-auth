@@ -1,0 +1,15 @@
+{
+  "app": {
+    "welcome": "Abre App.tsx para comenzar a trabajar en tu aplicacion."
+  },
+  "title": "Autenticador",
+  "search": "Buscar servicios",
+  "add": "Agregar código",
+  "scanQr": "Escanear QR",
+  "manualEntry": "Entrada manual",
+  "copied": "Copiado",
+  "settings": "Configuración",
+  "upgrade": "Actualizar a Premium",
+  "emptyTitle": "Aún no hay códigos",
+  "emptySubtitle": "Agrega tu primera cuenta para generar códigos OTP."
+}
