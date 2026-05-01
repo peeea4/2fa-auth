@@ -19,10 +19,10 @@ todos:
     status: completed
   - id: storage-service
     content: "Реализовать storage.service.ts: абстракция над expo-secure-store (секреты) и MMKV (метаданные)"
-    status: pending
+    status: completed
   - id: otp-service
     content: "Реализовать otp.service.ts: генерация TOTP через otplib, парсинг otpauth:// URI из QR"
-    status: pending
+    status: completed
   - id: crypto-service
     content: "Реализовать crypto.service.ts: хэширование PIN (bcrypt/sha256), вспомогательные функции шифрования"
     status: pending
