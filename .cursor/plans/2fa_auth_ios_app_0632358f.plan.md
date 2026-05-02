@@ -25,22 +25,22 @@ todos:
     status: completed
   - id: crypto-service
     content: "Реализовать crypto.service.ts: хэширование PIN (bcrypt/sha256), вспомогательные функции шифрования"
-    status: pending
+    status: completed
   - id: biometric-service
     content: "Реализовать biometric.service.ts: проверка доступности, запрос аутентификации, fallback на PIN"
-    status: pending
+    status: completed
   - id: adapty-service
     content: "Реализовать adapty.service.ts: инициализация SDK, проверка статуса подписки, показ paywall"
-    status: pending
+    status: completed
   - id: zustand-stores
     content: "Реализовать все Zustand stores: otp.store, auth.store, premium.store, settings.store с персистентностью через MMKV"
-    status: pending
+    status: completed
   - id: hooks
     content: "Реализовать hooks: useOtpTimer (глобальный countdown), useBiometrics, usePremium, useTheme"
-    status: pending
+    status: completed
   - id: navigation-layout
     content: "Настроить Expo Router: root _layout.tsx с auth gate, (tabs) layout с bottom tabs, modal presentations"
-    status: pending
+    status: completed
   - id: ui-components
     content: "Создать базовые UI компоненты: Button, Input, Sheet (bottom sheet), EmptyState, PremiumBadge"
     status: pending

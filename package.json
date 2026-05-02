@@ -4,8 +4,10 @@
   "main": "index.ts",
   "scripts": {
     "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
+    "start:dev": "expo start --dev-client",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
+    "ios:build": "expo run:ios",
     "web": "expo start --web"
   },
   "dependencies": {
@@ -13,6 +15,7 @@
     "expo-camera": "~17.0.10",
     "expo-constants": "~18.0.13",
     "expo-crypto": "~15.0.9",
+    "expo-dev-client": "~6.0.21",
     "expo-linking": "~8.0.12",
     "expo-local-authentication": "~17.0.8",
     "expo-localization": "~17.0.8",
