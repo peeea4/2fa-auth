@@ -16,6 +16,20 @@
     "copyLabel": "Copiar código de un solo uso",
     "copyHint": "Copia el código actual al portapapeles"
   },
+  "lock": {
+    "title": "App bloqueada",
+    "subtitle": "Introduce tu PIN de 4 dígitos para continuar.",
+    "unlockWithPin": "Desbloquear con PIN",
+    "wrongPin": "PIN incorrecto. Inténtalo de nuevo.",
+    "biometricFailed": "Falló la biometría. Introduce tu PIN.",
+    "failedAttempts": "Intentos fallidos: {{count}}",
+    "biometricPrompt": "Desbloquea tu autenticador",
+    "biometricFallback": "Usar PIN"
+  },
+  "biometricPrompt": {
+    "subtitle": "Desbloquear con Face ID / Touch ID",
+    "useBiometrics": "Usar biometría"
+  },
   "app": {
     "welcome": "Abre App.tsx para comenzar a trabajar en tu aplicacion."
   },
@@ -28,5 +42,20 @@
   "settings": "Configuración",
   "upgrade": "Actualizar a Premium",
   "emptyTitle": "Aún no hay códigos",
-  "emptySubtitle": "Agrega tu primera cuenta para generar códigos OTP."
+  "emptySubtitle": "Agrega tu primera cuenta para generar códigos OTP.",
+  "lockApp": "Bloquear app",
+  "showOnboardingAgain": "Ver introducción otra vez",
+  "tabCodes": "Códigos",
+  "homeHeading": "Códigos del autenticador",
+  "openPaywall": "Abrir suscripción",
+  "checking": "Comprobando…",
+  "done": "Hecho",
+  "close": "Cerrar",
+  "premium": "Premium",
+  "scanQrCaption": "Pantalla del escáner QR (marcador de posición).",
+  "manualEntryCaption": "Entrada manual de OTP (modal de marcador de posición).",
+  "paywallCaption": "Pantalla de suscripción (marcador de posición).",
+  "editOtpTitle": "Editar OTP",
+  "editOtpCaption": "ID de la entrada: {{id}}",
+  "unknownId": "desconocido"
 }

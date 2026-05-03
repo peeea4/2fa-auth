@@ -1,6 +1,7 @@
 import * as Crypto from 'expo-crypto';
 import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { SafeAreaView, StyleSheet, Text, View } from 'react-native';
 
 import { BiometricPrompt, PinPad } from '../components/lock';
@@ -17,6 +18,7 @@ const hashPin = async (pin: string): Promise<string> => {
 };
 
 export default function LockScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { colors } = useTheme();
   const isLocked = useAuthStore((state) => state.isLocked);
@@ -68,19 +70,19 @@ export default function LockScreen() {
 
     try {
       const result = await biometricService.authenticate({
-        promptMessage: 'Unlock your authenticator',
-        fallbackLabel: 'Use PIN',
+        promptMessage: t('lock.biometricPrompt'),
+        fallbackLabel: t('lock.biometricFallback'),
       });
 
       if (result.success) {
         unlock();
       } else {
-        setErrorText('Biometric auth failed. Enter your PIN.');
+        setErrorText(t('lock.biometricFailed'));
       }
     } finally {
       setIsSubmittingBiometric(false);
     }
-  }, [unlock]);
+  }, [t, unlock]);
 
   useEffect(() => {
     if (isBiometricEnabled && biometricAvailable) {
@@ -110,22 +112,20 @@ export default function LockScreen() {
         }
 
         incrementFailedAttempts();
-        setErrorText('Wrong PIN. Try again.');
+        setErrorText(t('lock.wrongPin'));
         setPinValue('');
       } finally {
         setIsSubmittingPin(false);
       }
     },
-    [incrementFailedAttempts, setPinSet, unlock],
+    [incrementFailedAttempts, setPinSet, t, unlock],
   );
 
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
       <View style={styles.container}>
-        <Text style={[styles.title, { color: colors.text }]}>App locked</Text>
-        <Text style={[styles.subtitle, { color: colors.textMuted }]}>
-          Enter your 4-digit PIN to continue.
-        </Text>
+        <Text style={[styles.title, { color: colors.text }]}>{t('lock.title')}</Text>
+        <Text style={[styles.subtitle, { color: colors.textMuted }]}>{t('lock.subtitle')}</Text>
 
         <PinPad
           disabled={isSubmittingPin}
@@ -143,7 +143,7 @@ export default function LockScreen() {
         />
 
         <Button
-          title={isSubmittingPin ? 'Checking...' : 'Unlock with PIN'}
+          title={isSubmittingPin ? t('checking') : t('lock.unlockWithPin')}
           disabled={isSubmittingPin || pinValue.length !== PIN_LENGTH}
           onPress={() => {
             void handlePinSubmit(pinValue);
@@ -160,7 +160,9 @@ export default function LockScreen() {
 
         {errorText ? <Text style={[styles.error, { color: colors.danger }]}>{errorText}</Text> : null}
         {failedAttempts > 0 ? (
-          <Text style={[styles.attempts, { color: colors.textMuted }]}>Failed attempts: {failedAttempts}</Text>
+          <Text style={[styles.attempts, { color: colors.textMuted }]}>
+            {t('lock.failedAttempts', { count: failedAttempts })}
+          </Text>
         ) : null}
       </View>
     </SafeAreaView>

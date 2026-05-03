@@ -1,10 +1,13 @@
 import { StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 export default function ScanQrScreen() {
+  const { t } = useTranslation();
+
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Scan QR</Text>
-      <Text style={styles.caption}>QR scanner screen placeholder.</Text>
+      <Text style={styles.title}>{t('scanQr')}</Text>
+      <Text style={styles.caption}>{t('scanQrCaption')}</Text>
     </View>
   );
 }

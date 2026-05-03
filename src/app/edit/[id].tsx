@@ -1,13 +1,15 @@
 import { useLocalSearchParams } from 'expo-router';
 import { StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 export default function EditOtpScreen() {
+  const { t } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Edit OTP</Text>
-      <Text style={styles.caption}>Entry ID: {id ?? 'unknown'}</Text>
+      <Text style={styles.title}>{t('editOtpTitle')}</Text>
+      <Text style={styles.caption}>{t('editOtpCaption', { id: id ?? t('unknownId') })}</Text>
     </View>
   );
 }

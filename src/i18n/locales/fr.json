@@ -16,6 +16,20 @@
     "copyLabel": "Copier le code à usage unique",
     "copyHint": "Copie le code actuel dans le presse-papiers"
   },
+  "lock": {
+    "title": "Application verrouillée",
+    "subtitle": "Saisissez votre code PIN à 4 chiffres pour continuer.",
+    "unlockWithPin": "Déverrouiller avec le PIN",
+    "wrongPin": "PIN incorrect. Réessayez.",
+    "biometricFailed": "Échec biométrique. Saisissez votre PIN.",
+    "failedAttempts": "Tentatives échouées : {{count}}",
+    "biometricPrompt": "Déverrouillez votre authentificateur",
+    "biometricFallback": "Utiliser le PIN"
+  },
+  "biometricPrompt": {
+    "subtitle": "Déverrouiller avec Face ID / Touch ID",
+    "useBiometrics": "Utiliser la biométrie"
+  },
   "app": {
     "welcome": "Ouvrez App.tsx pour commencer a travailler sur votre application."
   },
@@ -28,5 +42,20 @@
   "settings": "Paramètres",
   "upgrade": "Passer en Premium",
   "emptyTitle": "Aucun code",
-  "emptySubtitle": "Ajoutez votre premier compte pour générer des codes OTP."
+  "emptySubtitle": "Ajoutez votre premier compte pour générer des codes OTP.",
+  "lockApp": "Verrouiller l’app",
+  "showOnboardingAgain": "Revoir l’introduction",
+  "tabCodes": "Codes",
+  "homeHeading": "Codes d’authentification",
+  "openPaywall": "Ouvrir l’abonnement",
+  "checking": "Vérification…",
+  "done": "Terminé",
+  "close": "Fermer",
+  "premium": "Premium",
+  "scanQrCaption": "Écran du scanner QR (placeholder).",
+  "manualEntryCaption": "Saisie OTP manuelle (modal placeholder).",
+  "paywallCaption": "Écran d’abonnement (placeholder).",
+  "editOtpTitle": "Modifier l’OTP",
+  "editOtpCaption": "ID de l’entrée : {{id}}",
+  "unknownId": "inconnu"
 }

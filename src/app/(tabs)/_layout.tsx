@@ -1,8 +1,12 @@
 import { Tabs } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 
 export default function TabsLayout() {
+  const { t, i18n } = useTranslation();
+
   return (
     <Tabs
+      key={i18n.language}
       screenOptions={{
         headerShown: false,
       }}
@@ -10,15 +14,15 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Codes',
-          tabBarLabel: 'Codes',
+          title: t('tabCodes'),
+          tabBarLabel: t('tabCodes'),
         }}
       />
       <Tabs.Screen
         name="settings"
         options={{
-          title: 'Settings',
-          tabBarLabel: 'Settings',
+          title: t('settings'),
+          tabBarLabel: t('settings'),
         }}
       />
     </Tabs>

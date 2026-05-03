@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
+import i18n from '../i18n';
+import { resolveAppLanguage } from '../i18n/resolve-language';
 import { mmkvStorage } from './mmkv-storage';
 
 export type AppTheme = 'light' | 'dark' | 'system';
@@ -22,7 +24,7 @@ type SettingsStore = SettingsState & SettingsActions;
 
 const initialState: SettingsState = {
   theme: 'system',
-  language: 'en',
+  language: resolveAppLanguage(),
   isOnboardingCompleted: false,
 };
 
@@ -35,18 +37,33 @@ export const useSettingsStore = create<SettingsStore>()(
       },
       setLanguage: (language) => {
         set({ language });
+        void i18n.changeLanguage(language);
       },
       setOnboardingCompleted: (isCompleted) => {
         set({ isOnboardingCompleted: isCompleted });
       },
       resetSettings: () => {
-        set(initialState);
+        set({ ...initialState, language: resolveAppLanguage() });
+        void i18n.changeLanguage(resolveAppLanguage());
       },
     }),
     {
       name: 'settings.store',
       storage: createJSONStorage(() => mmkvStorage),
+      partialize: (state) => ({
+        theme: state.theme,
+        isOnboardingCompleted: state.isOnboardingCompleted,
+      }),
+      merge: (persistedState, currentState) => {
+        if (!persistedState || typeof persistedState !== 'object') {
+          return { ...currentState, language: resolveAppLanguage() };
+        }
+        return {
+          ...currentState,
+          ...(persistedState as Partial<SettingsState>),
+          language: resolveAppLanguage(),
+        };
+      },
     },
   ),
 );
-
