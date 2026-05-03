@@ -1,4 +1,3 @@
-import * as Clipboard from 'expo-clipboard';
 import * as Haptics from 'expo-haptics';
 import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -15,6 +14,7 @@ import { useOtpTimer } from '../../hooks/useOtpTimer';
 import { useTheme } from '../../hooks/useTheme';
 import { otpService } from '../../services/otp.service';
 import type { OtpDigits, OtpEntry } from '../../types';
+import { copyTextToClipboard } from '../../utils/copy-to-clipboard';
 import { CountdownBar } from './CountdownBar';
 
 const formatDisplayCode = (code: string, digits: OtpDigits): string => {
@@ -72,8 +72,12 @@ export function OtpCard({ entry, secret }: OtpCardProps) {
       return;
     }
 
+    const copied = await copyTextToClipboard(code);
+    if (!copied) {
+      return;
+    }
+
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-    await Clipboard.setStringAsync(code);
     showCopiedFeedback();
   }, [code, secret, showCopiedFeedback]);
 

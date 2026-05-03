@@ -178,6 +178,16 @@ class OtpService {
       period: rawPeriod,
     };
   }
+
+  /** Returns true if the secret decodes and produces a TOTP for the given parameters. */
+  validateTotpSetup(secret: string, algorithm: OtpAlgorithm, digits: OtpDigits, period: OtpPeriod): boolean {
+    try {
+      this.generateToken({ secret, algorithm, digits, period });
+      return true;
+    } catch {
+      return false;
+    }
+  }
 }
 
 export const otpService = new OtpService();

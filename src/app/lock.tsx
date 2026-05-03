@@ -2,7 +2,8 @@ import * as Crypto from 'expo-crypto';
 import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { SafeAreaView, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { BiometricPrompt, PinPad } from '../components/lock';
 import { Button } from '../components/ui';
@@ -122,7 +123,7 @@ export default function LockScreen() {
   );
 
   return (
-    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
+    <SafeAreaView edges={['top', 'left', 'right', 'bottom']} style={[styles.safeArea, { backgroundColor: colors.background }]}>
       <View style={styles.container}>
         <Text style={[styles.title, { color: colors.text }]}>{t('lock.title')}</Text>
         <Text style={[styles.subtitle, { color: colors.textMuted }]}>{t('lock.subtitle')}</Text>
