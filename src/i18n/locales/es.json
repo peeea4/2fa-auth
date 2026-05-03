@@ -1,4 +1,21 @@
 {
+  "onboarding": {
+    "skip": "Omitir",
+    "next": "Siguiente",
+    "getStarted": "Empezar",
+    "slide1Title": "Códigos que se quedan en tu dispositivo",
+    "slide1Subtitle": "Los secretos viven en el Llavero de iOS, no en la nube.",
+    "slide2Title": "Añade cuentas en segundos",
+    "slide2Subtitle": "Escanea un QR del servicio o introduce la clave manualmente.",
+    "slide3Title": "Toca para copiar",
+    "slide3Subtitle": "Un toque copia el código. La respuesta háptica confirma el portapapeles.",
+    "slide4Title": "Premium cuando lo necesites",
+    "slide4Subtitle": "Desbloquea escaneo QR, biometría y más límites — sigue en el plan gratuito hasta entonces."
+  },
+  "otpCard": {
+    "copyLabel": "Copiar código de un solo uso",
+    "copyHint": "Copia el código actual al portapapeles"
+  },
   "app": {
     "welcome": "Abre App.tsx para comenzar a trabajar en tu aplicacion."
   },
