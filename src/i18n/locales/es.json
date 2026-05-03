@@ -84,5 +84,15 @@
   "errorAccountRequired": "La cuenta es obligatoria",
   "errorSecretRequired": "La clave secreta es obligatoria",
   "errorSecretInvalid": "Clave no válida o parámetros no admitidos",
-  "errorSaveFailed": "No se pudo guardar. Inténtalo de nuevo."
+  "errorSaveFailed": "No se pudo guardar. Inténtalo de nuevo.",
+  "scanPremiumGateTitle": "Escanear QR es Premium",
+  "scanPremiumGateBody": "Mejora el plan para escanear códigos QR otpauth y añadir cuentas al instante.",
+  "scanCameraPermissionTitle": "Se necesita acceso a la cámara",
+  "scanCameraPermissionBody": "Permite el acceso a la cámara para escanear códigos QR de configuración 2FA.",
+  "scanOpenSettings": "Abrir Ajustes",
+  "scanGrantCamera": "Permitir cámara",
+  "scanAlignHint": "Coloca el código QR dentro del marco.",
+  "scanInvalidQr": "Este QR no es un enlace TOTP compatible.",
+  "scanLimitTitle": "No se puede añadir la cuenta",
+  "scanLimitMessage": "Has alcanzado el límite de cuentas de tu plan actual."
 }

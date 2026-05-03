@@ -84,5 +84,15 @@
   "errorAccountRequired": "Account is required",
   "errorSecretRequired": "Secret key is required",
   "errorSecretInvalid": "Invalid secret or unsupported parameters",
-  "errorSaveFailed": "Could not save. Try again."
+  "errorSaveFailed": "Could not save. Try again.",
+  "scanPremiumGateTitle": "QR scanning is Premium",
+  "scanPremiumGateBody": "Upgrade to scan otpauth QR codes and add accounts in one step.",
+  "scanCameraPermissionTitle": "Camera access needed",
+  "scanCameraPermissionBody": "Allow camera access to scan two-factor setup QR codes.",
+  "scanOpenSettings": "Open Settings",
+  "scanGrantCamera": "Allow camera",
+  "scanAlignHint": "Align the QR code inside the frame.",
+  "scanInvalidQr": "This QR is not a supported TOTP setup link.",
+  "scanLimitTitle": "Cannot add account",
+  "scanLimitMessage": "You have reached the account limit for your current plan."
 }

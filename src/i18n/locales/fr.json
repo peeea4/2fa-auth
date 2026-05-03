@@ -84,5 +84,15 @@
   "errorAccountRequired": "Le compte est obligatoire",
   "errorSecretRequired": "La clé secrète est obligatoire",
   "errorSecretInvalid": "Clé invalide ou paramètres non pris en charge",
-  "errorSaveFailed": "Enregistrement impossible. Réessayez."
+  "errorSaveFailed": "Enregistrement impossible. Réessayez.",
+  "scanPremiumGateTitle": "Le scan QR est Premium",
+  "scanPremiumGateBody": "Passez à Premium pour scanner les QR otpauth et ajouter des comptes en une étape.",
+  "scanCameraPermissionTitle": "Accès à la caméra requis",
+  "scanCameraPermissionBody": "Autorisez la caméra pour scanner les codes QR de configuration 2FA.",
+  "scanOpenSettings": "Ouvrir Réglages",
+  "scanGrantCamera": "Autoriser la caméra",
+  "scanAlignHint": "Alignez le code QR dans le cadre.",
+  "scanInvalidQr": "Ce QR n’est pas un lien TOTP pris en charge.",
+  "scanLimitTitle": "Impossible d’ajouter le compte",
+  "scanLimitMessage": "Vous avez atteint la limite de comptes de votre offre actuelle."
 }
