@@ -1,4 +1,21 @@
 {
+  "onboarding": {
+    "skip": "Passer",
+    "next": "Suivant",
+    "getStarted": "Commencer",
+    "slide1Title": "Des codes qui restent sur l’appareil",
+    "slide1Subtitle": "Les secrets sont dans le trousseau iOS, pas dans le cloud.",
+    "slide2Title": "Ajoutez des comptes en quelques secondes",
+    "slide2Subtitle": "Scannez un QR depuis le service ou saisissez la clé manuellement.",
+    "slide3Title": "Appuyez pour copier",
+    "slide3Subtitle": "Un appui copie le code. Les haptics confirment le presse-papiers.",
+    "slide4Title": "Premium quand vous en avez besoin",
+    "slide4Subtitle": "Débloquez le scan QR, la biométrie et des limites plus hautes — restez gratuit sinon."
+  },
+  "otpCard": {
+    "copyLabel": "Copier le code à usage unique",
+    "copyHint": "Copie le code actuel dans le presse-papiers"
+  },
   "app": {
     "welcome": "Ouvrez App.tsx pour commencer a travailler sur votre application."
   },
