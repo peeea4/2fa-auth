@@ -1,43 +1,53 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { router } from 'expo-router';
+import { StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { useAuthStore } from '../../stores';
+import { Button } from '../../components/ui/Button';
+import { useTheme } from '../../hooks/useTheme';
+import { useAuthStore, useSettingsStore } from '../../stores';
 
 export default function SettingsScreen() {
+  const { t } = useTranslation();
+  const { colors } = useTheme();
   const lock = useAuthStore((state) => state.lock);
+  const setOnboardingCompleted = useSettingsStore((state) => state.setOnboardingCompleted);
+
+  const handleShowOnboardingAgain = () => {
+    setOnboardingCompleted(false);
+    // Явный маршрут: replace('/') из табов не всегда снова монтирует app/index,
+    // из‑за чего редирект на онбординг по флагу не срабатывает.
+    router.replace('/onboarding');
+  };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Settings</Text>
-      <Pressable onPress={lock} style={styles.button}>
-        <Text style={styles.buttonText}>Lock App</Text>
-      </Pressable>
-    </View>
+    <SafeAreaView edges={['top', 'left', 'right']} style={[styles.safe, { backgroundColor: colors.background }]}>
+      <View style={styles.container}>
+        <Text style={[styles.title, { color: colors.text }]}>{t('settings')}</Text>
+
+        <View style={styles.actions}>
+          <Button onPress={lock} title={t('lockApp')} variant="primary" />
+          <Button onPress={handleShowOnboardingAgain} title={t('showOnboardingAgain')} variant="secondary" />
+        </View>
+      </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  safe: {
+    flex: 1,
+  },
   container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 12,
-    padding: 16,
+    padding: 20,
+    gap: 20,
   },
   title: {
-    fontSize: 24,
-    fontWeight: '600',
-    marginBottom: 8,
+    fontSize: 28,
+    fontWeight: '700',
   },
-  button: {
-    minWidth: 220,
-    borderRadius: 10,
-    backgroundColor: '#111827',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  buttonText: {
-    color: '#ffffff',
-    fontSize: 16,
-    textAlign: 'center',
+  actions: {
+    gap: 12,
   },
 });

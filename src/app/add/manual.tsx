@@ -1,17 +1,20 @@
 import { router } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 export default function ManualEntryScreen() {
+  const { t } = useTranslation();
+
   const handleDone = () => {
     router.dismissTo('/(tabs)');
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Manual Entry</Text>
-      <Text style={styles.caption}>Manual OTP entry placeholder modal.</Text>
+      <Text style={styles.title}>{t('manualEntry')}</Text>
+      <Text style={styles.caption}>{t('manualEntryCaption')}</Text>
       <Pressable style={styles.button} onPress={handleDone}>
-        <Text style={styles.buttonText}>Done</Text>
+        <Text style={styles.buttonText}>{t('done')}</Text>
       </Pressable>
     </View>
   );

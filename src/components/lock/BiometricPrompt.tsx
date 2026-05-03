@@ -1,5 +1,6 @@
 import { Fingerprint } from 'lucide-react-native';
 import { StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '../../hooks/useTheme';
 import { Button } from '../ui';
@@ -11,6 +12,7 @@ type BiometricPromptProps = {
 };
 
 export function BiometricPrompt({ isAvailable, isLoading = false, onPress }: BiometricPromptProps) {
+  const { t } = useTranslation();
   const { colors } = useTheme();
 
   if (!isAvailable) return null;
@@ -18,8 +20,12 @@ export function BiometricPrompt({ isAvailable, isLoading = false, onPress }: Bio
   return (
     <View style={[styles.container, { borderColor: colors.border, backgroundColor: colors.surface }]}>
       <Fingerprint color={colors.primary} size={20} />
-      <Text style={[styles.text, { color: colors.text }]}>Unlock with Face ID / Touch ID</Text>
-      <Button title={isLoading ? 'Checking...' : 'Use biometrics'} onPress={onPress} disabled={isLoading} />
+      <Text style={[styles.text, { color: colors.text }]}>{t('biometricPrompt.subtitle')}</Text>
+      <Button
+        title={isLoading ? t('checking') : t('biometricPrompt.useBiometrics')}
+        onPress={onPress}
+        disabled={isLoading}
+      />
     </View>
   );
 }

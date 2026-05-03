@@ -16,6 +16,20 @@
     "copyLabel": "Copy one-time code",
     "copyHint": "Copies the current code to the clipboard"
   },
+  "lock": {
+    "title": "App locked",
+    "subtitle": "Enter your 4-digit PIN to continue.",
+    "unlockWithPin": "Unlock with PIN",
+    "wrongPin": "Wrong PIN. Try again.",
+    "biometricFailed": "Biometric auth failed. Enter your PIN.",
+    "failedAttempts": "Failed attempts: {{count}}",
+    "biometricPrompt": "Unlock your authenticator",
+    "biometricFallback": "Use PIN"
+  },
+  "biometricPrompt": {
+    "subtitle": "Unlock with Face ID / Touch ID",
+    "useBiometrics": "Use biometrics"
+  },
   "app": {
     "welcome": "Open up App.tsx to start working on your app!"
   },
@@ -28,5 +42,20 @@
   "settings": "Settings",
   "upgrade": "Upgrade to Premium",
   "emptyTitle": "No codes yet",
-  "emptySubtitle": "Add your first account to start generating OTP codes."
+  "emptySubtitle": "Add your first account to start generating OTP codes.",
+  "lockApp": "Lock app",
+  "showOnboardingAgain": "Show onboarding again",
+  "tabCodes": "Codes",
+  "homeHeading": "Authenticator codes",
+  "openPaywall": "Open subscription",
+  "checking": "Checking…",
+  "done": "Done",
+  "close": "Close",
+  "premium": "Premium",
+  "scanQrCaption": "QR scanner screen placeholder.",
+  "manualEntryCaption": "Manual OTP entry placeholder modal.",
+  "paywallCaption": "Subscription screen placeholder.",
+  "editOtpTitle": "Edit OTP",
+  "editOtpCaption": "Entry ID: {{id}}",
+  "unknownId": "unknown"
 }

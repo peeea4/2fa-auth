@@ -16,6 +16,20 @@
     "copyLabel": "Скопировать одноразовый код",
     "copyHint": "Копирует текущий код в буфер обмена"
   },
+  "lock": {
+    "title": "Приложение заблокировано",
+    "subtitle": "Введите 4-значный PIN, чтобы продолжить.",
+    "unlockWithPin": "Разблокировать PIN-кодом",
+    "wrongPin": "Неверный PIN. Попробуйте снова.",
+    "biometricFailed": "Биометрия не сработала. Введите PIN.",
+    "failedAttempts": "Неудачных попыток: {{count}}",
+    "biometricPrompt": "Разблокируйте аутентификатор",
+    "biometricFallback": "Использовать PIN"
+  },
+  "biometricPrompt": {
+    "subtitle": "Разблокировать Face ID / Touch ID",
+    "useBiometrics": "Использовать биометрию"
+  },
   "app": {
     "welcome": "Откройте App.tsx, чтобы начать работу над приложением."
   },
@@ -28,5 +42,20 @@
   "settings": "Настройки",
   "upgrade": "Перейти на Premium",
   "emptyTitle": "Кодов пока нет",
-  "emptySubtitle": "Добавьте первый аккаунт, чтобы генерировать OTP-коды."
+  "emptySubtitle": "Добавьте первый аккаунт, чтобы генерировать OTP-коды.",
+  "lockApp": "Заблокировать приложение",
+  "showOnboardingAgain": "Показать онбординг снова",
+  "tabCodes": "Коды",
+  "homeHeading": "Коды аутентификатора",
+  "openPaywall": "Открыть подписку",
+  "checking": "Проверка…",
+  "done": "Готово",
+  "close": "Закрыть",
+  "premium": "Premium",
+  "scanQrCaption": "Экран сканера QR (заглушка).",
+  "manualEntryCaption": "Ручной ввод OTP (заглушка модального окна).",
+  "paywallCaption": "Экран подписки (заглушка).",
+  "editOtpTitle": "Изменить OTP",
+  "editOtpCaption": "ID записи: {{id}}",
+  "unknownId": "неизвестно"
 }
