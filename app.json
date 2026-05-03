@@ -24,7 +24,14 @@
       "expo-dev-client",
       "expo-router",
       "expo-secure-store",
-      "expo-localization"
+      "expo-localization",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "$(PRODUCT_NAME) needs camera access to scan two-factor authentication QR codes.",
+          "recordAudioAndroid": false
+        }
+      ]
     ]
   }
 }

@@ -84,5 +84,15 @@
   "errorAccountRequired": "Укажите аккаунт",
   "errorSecretRequired": "Введите секретный ключ",
   "errorSecretInvalid": "Неверный ключ или параметры не поддерживаются",
-  "errorSaveFailed": "Не удалось сохранить. Попробуйте снова."
+  "errorSaveFailed": "Не удалось сохранить. Попробуйте снова.",
+  "scanPremiumGateTitle": "Сканирование QR — Premium",
+  "scanPremiumGateBody": "Оформите Premium, чтобы сканировать otpauth QR и добавлять аккаунты в один шаг.",
+  "scanCameraPermissionTitle": "Нужен доступ к камере",
+  "scanCameraPermissionBody": "Разрешите доступ к камере, чтобы сканировать QR-коды настройки 2FA.",
+  "scanOpenSettings": "Открыть настройки",
+  "scanGrantCamera": "Разрешить камеру",
+  "scanAlignHint": "Поместите QR-код в рамку.",
+  "scanInvalidQr": "Этот QR не является поддерживаемой ссылкой TOTP.",
+  "scanLimitTitle": "Нельзя добавить аккаунт",
+  "scanLimitMessage": "Достигнут лимит аккаунтов для вашего тарифа."
 }
