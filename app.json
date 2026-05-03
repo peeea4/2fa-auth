@@ -2,6 +2,7 @@
   "expo": {
     "name": "2fa-auth",
     "slug": "2fa-auth",
+    "scheme": "2fa-auth",
     "version": "1.0.0",
     "platforms": [
       "ios"
