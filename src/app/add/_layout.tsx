@@ -4,7 +4,7 @@ export default function AddLayout() {
   return (
     <Stack>
       <Stack.Screen name="scan" options={{ headerShown: false }} />
-      <Stack.Screen name="manual" options={{ presentation: 'modal', title: 'Manual Entry' }} />
+      <Stack.Screen name="manual" options={{ headerShown: false }} />
     </Stack>
   );
 }

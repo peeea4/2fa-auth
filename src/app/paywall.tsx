@@ -1,16 +1,18 @@
-import { Link } from 'expo-router';
+import { router } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 export default function PaywallScreen() {
+  const handleClose = () => {
+    router.dismissTo('/(tabs)');
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Premium</Text>
       <Text style={styles.caption}>Paywall placeholder modal screen.</Text>
-      <Link asChild href="/(tabs)">
-        <Pressable style={styles.button}>
-          <Text style={styles.buttonText}>Close</Text>
-        </Pressable>
-      </Link>
+      <Pressable style={styles.button} onPress={handleClose}>
+        <Text style={styles.buttonText}>Close</Text>
+      </Pressable>
     </View>
   );
 }
