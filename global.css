@@ -1,0 +1,35 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/**
+ * CSS variables for NativeWind / Tailwind theme extension.
+ * RGB triplets must match `src/constants/colors.ts` → `themeRgbChannels`.
+ */
+@layer base {
+  :root {
+    --color-background: 248 250 252;
+    --color-surface: 255 255 255;
+    --color-foreground: 15 23 42;
+    --color-muted: 71 85 105;
+    --color-border: 226 232 240;
+    --color-primary: 37 99 235;
+    --color-success: 22 163 74;
+    --color-warning: 217 119 6;
+    --color-danger: 220 38 38;
+    --color-ring: 37 99 235;
+  }
+
+  .dark {
+    --color-background: 2 6 23;
+    --color-surface: 15 23 42;
+    --color-foreground: 248 250 252;
+    --color-muted: 148 163 184;
+    --color-border: 30 41 59;
+    --color-primary: 96 165 250;
+    --color-success: 74 222 128;
+    --color-warning: 251 191 36;
+    --color-danger: 248 113 113;
+    --color-ring: 96 165 250;
+  }
+}

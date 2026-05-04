@@ -1,42 +1,94 @@
 import { useFocusEffect } from '@react-navigation/native';
 import Constants from 'expo-constants';
 import { router } from 'expo-router';
-import { Check, ChevronRight } from 'lucide-react-native';
-import { useCallback, useEffect, useState } from 'react';
+import { Check, Lock } from 'lucide-react-native';
+import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { Alert, Platform, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '../../components/ui/Button';
+import type { AppTheme, SemanticColors } from '../../constants/colors';
 import { config } from '../../constants/config';
 import { SUPPORTED_LANGUAGES, type SupportedLanguage } from '../../i18n/resolve-language';
 import { usePremium } from '../../hooks/usePremium';
 import { useTheme } from '../../hooks/useTheme';
 import { biometricService } from '../../services/biometric.service';
 import { useAuthStore, useSettingsStore } from '../../stores';
-import type { AppTheme } from '../../stores/settings.store';
 
-const LANGUAGE_LABELS: Record<SupportedLanguage, string> = {
+/** Порядок пунктов в настройках (светлая → тёмная → как в системе). */
+const THEME_ORDER: AppTheme[] = ['light', 'dark', 'system'];
+
+const THEME_LABEL_KEY: Record<AppTheme, string> = {
+  light: 'settingsScreen.themeLight',
+  dark: 'settingsScreen.themeDark',
+  system: 'settingsScreen.themeSystem',
+};
+
+/** Нативные подписи языков (endonym), не из i18n — так принято в системных списках языков. */
+const LANGUAGE_DISPLAY_NAME: Record<SupportedLanguage, string> = {
   en: 'English',
   es: 'Español',
   fr: 'Français',
   ru: 'Русский',
 };
 
-const THEME_OPTIONS: { value: AppTheme; labelKey: string }[] = [
-  { value: 'light', labelKey: 'settingsScreen.themeLight' },
-  { value: 'dark', labelKey: 'settingsScreen.themeDark' },
-  { value: 'system', labelKey: 'settingsScreen.themeSystem' },
-];
+type InsetSelectItem = {
+  id: string;
+  label: string;
+  selected: boolean;
+  onSelect: () => void;
+};
+
+type SettingsInsetSelectListProps = {
+  items: InsetSelectItem[];
+  colors: SemanticColors;
+};
+
+function SettingsInsetSelectList({ items, colors }: SettingsInsetSelectListProps) {
+  return (
+    <View style={[styles.card, styles.cardSelectList, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+      {items.map((item, index) => (
+        <Fragment key={item.id}>
+          {index > 0 ? <View style={[styles.selectListDivider, { backgroundColor: colors.border }]} /> : null}
+          <Pressable
+            accessibilityLabel={item.label}
+            accessibilityRole="button"
+            accessibilityState={{ selected: item.selected }}
+            hitSlop={8}
+            onPress={item.onSelect}
+            style={({ pressed }) => [styles.selectListPressable, pressed && styles.rowPressed]}
+          >
+            <View style={styles.row}>
+              <View style={styles.rowMain}>
+                <Text
+                  numberOfLines={2}
+                  style={[styles.rowLabel, styles.selectListLabel, { color: colors.text }]}
+                  {...(Platform.OS === 'android' ? { includeFontPadding: false } : {})}
+                >
+                  {item.label}
+                </Text>
+              </View>
+              <View style={styles.rowTrailing}>
+                {item.selected ? <Check color={colors.primary} size={22} strokeWidth={2.5} /> : null}
+              </View>
+            </View>
+          </Pressable>
+        </Fragment>
+      ))}
+    </View>
+  );
+}
 
 export default function SettingsScreen() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const { colors, isDark, theme, setTheme } = useTheme();
   const lock = useAuthStore((state) => state.lock);
   const isBiometricEnabled = useAuthStore((state) => state.isBiometricEnabled);
   const setBiometricEnabled = useAuthStore((state) => state.setBiometricEnabled);
 
   const setOnboardingCompleted = useSettingsStore((state) => state.setOnboardingCompleted);
+  const storedLanguage = useSettingsStore((state) => state.language);
   const setLanguage = useSettingsStore((state) => state.setLanguage);
   const devPremiumOverride = useSettingsStore((state) => state.devPremiumOverride);
   const setDevPremiumOverride = useSettingsStore((state) => state.setDevPremiumOverride);
@@ -86,10 +138,6 @@ export default function SettingsScreen() {
     }
   };
 
-  const handleLanguagePress = (code: SupportedLanguage) => {
-    setLanguage(code);
-  };
-
   const handleShowOnboardingAgain = () => {
     setOnboardingCompleted(false);
     router.replace('/onboarding');
@@ -101,6 +149,32 @@ export default function SettingsScreen() {
   const deviceAuthSwitchValue = Boolean(isBiometricEnabled && canUseBiometric);
 
   const canLockNow = canUseBiometric && isBiometricEnabled;
+
+  const themeSelectItems = useMemo<InsetSelectItem[]>(
+    () =>
+      THEME_ORDER.map((value) => ({
+        id: value,
+        label: t(THEME_LABEL_KEY[value]),
+        selected: theme === value,
+        onSelect: () => {
+          setTheme(value);
+        },
+      })),
+    [setTheme, t, theme],
+  );
+
+  const languageSelectItems = useMemo<InsetSelectItem[]>(
+    () =>
+      SUPPORTED_LANGUAGES.map((code) => ({
+        id: code,
+        label: LANGUAGE_DISPLAY_NAME[code],
+        selected: storedLanguage === code || storedLanguage.startsWith(`${code}-`),
+        onSelect: () => {
+          setLanguage(code);
+        },
+      })),
+    [setLanguage, storedLanguage],
+  );
 
   return (
     <SafeAreaView edges={['top', 'left', 'right']} style={[styles.safe, { backgroundColor: colors.background }]}>
@@ -124,84 +198,59 @@ export default function SettingsScreen() {
                     : t('settingsScreen.deviceAuthHint')}
               </Text>
             </View>
-            <Switch
-              accessibilityLabel={t('settingsScreen.deviceAuth')}
-              disabled={deviceAuthSwitchDisabled}
-              ios_backgroundColor={isDark ? colors.border : undefined}
-              onValueChange={(value) => {
-                void handleDeviceAuthToggle(value);
-              }}
-              trackColor={{ false: colors.border, true: colors.primary }}
-              value={deviceAuthSwitchValue}
-            />
+            <View style={styles.rowTrailing}>
+              <Switch
+                accessibilityLabel={t('settingsScreen.deviceAuth')}
+                disabled={deviceAuthSwitchDisabled}
+                ios_backgroundColor={isDark ? colors.border : undefined}
+                onValueChange={(value) => {
+                  void handleDeviceAuthToggle(value);
+                }}
+                trackColor={{ false: colors.border, true: colors.primary }}
+                value={deviceAuthSwitchValue}
+              />
+            </View>
           </View>
 
           {canLockNow ? (
             <>
               <View style={[styles.divider, { backgroundColor: colors.border }]} />
               <Pressable
+                accessibilityHint={t('settingsScreen.lockNowHint')}
+                accessibilityLabel={t('lockApp')}
                 accessibilityRole="button"
+                hitSlop={8}
                 onPress={() => {
                   lock();
                   router.replace('/lock');
                 }}
-                style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
+                style={({ pressed }) => [styles.selectListPressable, pressed && styles.rowPressed]}
               >
-                <View style={styles.rowMain}>
-                  <Text style={[styles.rowLabel, { color: colors.text }]}>{t('lockApp')}</Text>
-                  <Text style={[styles.rowHint, { color: colors.textMuted }]}>{t('settingsScreen.lockNowHint')}</Text>
+                <View style={styles.row}>
+                  <View style={styles.rowMain}>
+                    <Text style={[styles.rowLabel, { color: colors.text }]}>{t('lockApp')}</Text>
+                    <Text style={[styles.rowHint, { color: colors.textMuted }]}>
+                      {t('settingsScreen.lockNowHint')}
+                    </Text>
+                  </View>
+                  <View style={styles.rowTrailing}>
+                    <Lock color={colors.primary} size={22} strokeWidth={2.25} />
+                  </View>
                 </View>
-                <ChevronRight color={colors.textMuted} size={20} />
               </Pressable>
             </>
           ) : null}
         </View>
 
-        <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>{t('settingsScreen.appearance')}</Text>
-        <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-          {THEME_OPTIONS.map((option, index) => {
-            const selected = theme === option.value;
-            return (
-              <View key={option.value}>
-                {index > 0 ? <View style={[styles.divider, { backgroundColor: colors.border }]} /> : null}
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityState={{ selected }}
-                  onPress={() => {
-                    setTheme(option.value);
-                  }}
-                  style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
-                >
-                  <Text style={[styles.rowLabel, { color: colors.text }]}>{t(option.labelKey)}</Text>
-                  {selected ? <Check color={colors.primary} size={22} strokeWidth={2.5} /> : null}
-                </Pressable>
-              </View>
-            );
-          })}
-        </View>
+        <Text style={[styles.sectionTitle, styles.sectionTitleList, { color: colors.textMuted }]}>
+          {t('settingsScreen.appearance')}
+        </Text>
+        <SettingsInsetSelectList colors={colors} items={themeSelectItems} />
 
-        <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>{t('settingsScreen.language')}</Text>
-        <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-          {SUPPORTED_LANGUAGES.map((code, index) => {
-            const selected = i18n.language.startsWith(code);
-            return (
-              <View key={code}>
-                {index > 0 ? <View style={[styles.divider, { backgroundColor: colors.border }]} /> : null}
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityState={{ selected }}
-                  onPress={() => {
-                    handleLanguagePress(code);
-                  }}
-                  style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
-                >
-                  <Text style={[styles.rowLabel, { color: colors.text }]}>{LANGUAGE_LABELS[code]}</Text>
-                  {selected ? <Check color={colors.primary} size={22} strokeWidth={2.5} /> : null}
-                </Pressable>
-              </View>
-            );
-          })}
-        </View>
+        <Text style={[styles.sectionTitle, styles.sectionTitleList, { color: colors.textMuted }]}>
+          {t('settingsScreen.language')}
+        </Text>
+        <SettingsInsetSelectList colors={colors} items={languageSelectItems} />
 
         <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>{t('settingsScreen.premium')}</Text>
         <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
@@ -253,13 +302,15 @@ export default function SettingsScreen() {
                   <Text style={[styles.rowLabel, { color: colors.text }]}>{t('devPremiumToggle')}</Text>
                   <Text style={[styles.rowHint, { color: colors.textMuted }]}>{t('devPremiumHint')}</Text>
                 </View>
-                <Switch
-                  accessibilityLabel={t('devPremiumToggle')}
-                  ios_backgroundColor={isDark ? colors.border : undefined}
-                  onValueChange={setDevPremiumOverride}
-                  trackColor={{ false: colors.border, true: colors.primary }}
-                  value={devPremiumOverride}
-                />
+                <View style={styles.rowTrailing}>
+                  <Switch
+                    accessibilityLabel={t('devPremiumToggle')}
+                    ios_backgroundColor={isDark ? colors.border : undefined}
+                    onValueChange={setDevPremiumOverride}
+                    trackColor={{ false: colors.border, true: colors.primary }}
+                    value={devPremiumOverride}
+                  />
+                </View>
               </View>
             </View>
           </>
@@ -291,14 +342,35 @@ const styles = StyleSheet.create({
     marginTop: 16,
     marginBottom: 4,
   },
+  /** Доп. воздух над карточками выбора (оформление / язык). */
+  sectionTitleList: {
+    marginBottom: 8,
+  },
   card: {
     borderRadius: 14,
     borderWidth: 1,
     paddingVertical: 4,
     gap: 0,
   },
+  /** Обрезка разделителей по скруглению; вертикальные поля задаёт только `styles.card`, как у карточки безопасности. */
+  cardSelectList: {
+    overflow: 'hidden',
+  },
+  selectListDivider: {
+    height: StyleSheet.hairlineWidth,
+    marginHorizontal: 16,
+  },
+  /** `Pressable` по умолчанию ведёт себя как колонка — растягиваем на ширину карточки, строку даём внутреннему `View`. */
+  selectListPressable: {
+    alignSelf: 'stretch',
+  },
+  /** Текст в списке выбора: сжатие по ширине, чтобы `rowTrailing` не переносился на новую строку. */
+  selectListLabel: {
+    flexShrink: 1,
+  },
   row: {
     flexDirection: 'row',
+    flexWrap: 'nowrap',
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: 12,
@@ -311,7 +383,16 @@ const styles = StyleSheet.create({
   },
   rowMain: {
     flex: 1,
+    minWidth: 0,
     gap: 4,
+    paddingRight: 4,
+  },
+  /** Фиксированная правая колонка под Switch / Chevron. */
+  rowTrailing: {
+    flexShrink: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: 28,
   },
   rowLabel: {
     fontSize: 16,
@@ -326,7 +407,7 @@ const styles = StyleSheet.create({
   },
   divider: {
     height: StyleSheet.hairlineWidth,
-    marginLeft: 16,
+    marginHorizontal: 16,
   },
   cardBody: {
     padding: 16,
