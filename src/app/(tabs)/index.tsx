@@ -26,6 +26,7 @@ export default function HomeScreen() {
 
   const [search, setSearch] = useState('');
   const [addMenuOpen, setAddMenuOpen] = useState(false);
+  const [entryForActions, setEntryForActions] = useState<OtpEntry | null>(null);
   const [secretsById, setSecretsById] = useState<Record<string, string | null>>({});
 
   useEffect(() => {
@@ -82,37 +83,26 @@ export default function HomeScreen() {
     openPaywall();
   }, [canAddCode, openPaywall]);
 
-  const handleLongPressEntry = useCallback(
+  const confirmDeleteEntry = useCallback(
     (entry: OtpEntry) => {
-      Alert.alert(entry.issuer || entry.account, undefined, [
+      Alert.alert(t('deleteConfirmTitle'), t('deleteConfirmMessage'), [
         { text: t('cancel'), style: 'cancel' },
-        {
-          text: t('edit'),
-          onPress: () => {
-            router.push(`/edit/${entry.id}`);
-          },
-        },
         {
           text: t('delete'),
           style: 'destructive',
-          onPress: () => {
-            Alert.alert(t('deleteConfirmTitle'), t('deleteConfirmMessage'), [
-              { text: t('cancel'), style: 'cancel' },
-              {
-                text: t('delete'),
-                style: 'destructive',
-                onPress: async () => {
-                  await storageService.deleteOtpSecret(entry.id);
-                  removeEntry(entry.id);
-                },
-              },
-            ]);
+          onPress: async () => {
+            await storageService.deleteOtpSecret(entry.id);
+            removeEntry(entry.id);
           },
         },
       ]);
     },
     [removeEntry, t],
   );
+
+  const handleLongPressEntry = useCallback((entry: OtpEntry) => {
+    setEntryForActions(entry);
+  }, []);
 
   return (
     <SafeAreaView edges={['top', 'left', 'right']} key={i18n.language} style={[styles.safe, { backgroundColor: colors.background }]}>
@@ -172,6 +162,41 @@ export default function HomeScreen() {
       >
         <Plus color="#ffffff" size={28} strokeWidth={2.5} />
       </Pressable>
+
+      <Sheet onClose={() => setEntryForActions(null)} visible={entryForActions !== null}>
+        <Text numberOfLines={2} style={[styles.sheetTitle, { color: colors.text }]}>
+          {entryForActions ? entryForActions.issuer || entryForActions.account : ''}
+        </Text>
+        <Text style={[styles.sheetSubtitle, { color: colors.textMuted }]}>
+          {entryForActions?.account && entryForActions.issuer ? entryForActions.account : null}
+        </Text>
+        <View style={styles.sheetRows}>
+          <Pressable
+            onPress={() => {
+              const target = entryForActions;
+              setEntryForActions(null);
+              if (target) {
+                router.push(`/edit/${target.id}`);
+              }
+            }}
+            style={({ pressed }) => [styles.sheetRow, { opacity: pressed ? 0.75 : 1, borderColor: colors.border }]}
+          >
+            <Text style={[styles.sheetRowTitle, { color: colors.text }]}>{t('edit')}</Text>
+          </Pressable>
+          <Pressable
+            onPress={() => {
+              const target = entryForActions;
+              setEntryForActions(null);
+              if (target) {
+                confirmDeleteEntry(target);
+              }
+            }}
+            style={({ pressed }) => [styles.sheetRow, { opacity: pressed ? 0.75 : 1, borderColor: colors.danger }]}
+          >
+            <Text style={[styles.sheetRowTitle, { color: colors.danger }]}>{t('delete')}</Text>
+          </Pressable>
+        </View>
+      </Sheet>
 
       <Sheet onClose={() => setAddMenuOpen(false)} visible={addMenuOpen}>
         <Text style={[styles.sheetTitle, { color: colors.text }]}>{t('addSheetTitle')}</Text>
@@ -237,6 +262,11 @@ const styles = StyleSheet.create({
   sheetTitle: {
     fontSize: 17,
     fontWeight: '700',
+    marginBottom: 4,
+  },
+  sheetSubtitle: {
+    fontSize: 14,
+    marginTop: -4,
     marginBottom: 4,
   },
   sheetRows: {
