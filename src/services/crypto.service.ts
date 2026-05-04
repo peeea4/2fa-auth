@@ -1,9 +1,6 @@
 import * as Crypto from 'expo-crypto';
 
-import { storageService } from './storage.service';
-
-const PIN_HASH_PREFIX = 'sha256-v1';
-const PIN_HASH_PEPPER = 'otp-pin-pepper';
+const CRYPTO_KDF_PEPPER = 'otp-pin-pepper';
 const ENCRYPTION_PREFIX = 'enc-v1';
 const BASE64_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 
@@ -123,57 +120,8 @@ class CryptoService {
   }
 
   private async deriveKeyMaterial(keyMaterial: string): Promise<Uint8Array> {
-    const digest = await this.digestSha256(`${keyMaterial}:${PIN_HASH_PEPPER}`);
+    const digest = await this.digestSha256(`${keyMaterial}:${CRYPTO_KDF_PEPPER}`);
     return fromHex(digest);
-  }
-
-  async hashPin(pin: string): Promise<string> {
-    const normalizedPin = pin.trim();
-    const salt = toHex(getRandomBytes(16));
-    const digest = await this.digestSha256(`${PIN_HASH_PREFIX}:${salt}:${normalizedPin}:${PIN_HASH_PEPPER}`);
-    return `${PIN_HASH_PREFIX}:${salt}:${digest}`;
-  }
-
-  async verifyPin(pin: string, storedHash?: string | null): Promise<boolean> {
-    const savedHash = storedHash ?? (await storageService.getPinHash());
-    if (!savedHash) {
-      return false;
-    }
-
-    const normalizedPin = pin.trim();
-
-    const segments = savedHash.split(':');
-    if (segments.length >= 3 && segments[0] === PIN_HASH_PREFIX) {
-      const [, salt, expectedHash] = segments;
-      if (!salt || !expectedHash) {
-        return false;
-      }
-      const currentHash = await this.digestSha256(`${PIN_HASH_PREFIX}:${salt}:${normalizedPin}:${PIN_HASH_PEPPER}`);
-      return currentHash === expectedHash;
-    }
-
-    // Older builds stored a bare 64-char SHA256 hex (lock screen) or legacy salted digest — both lack ":".
-    if (!savedHash.includes(':')) {
-      if (/^[a-f0-9]{64}$/i.test(savedHash)) {
-        const plainDigest = await this.digestSha256(normalizedPin);
-        const legacySaltDigest = await this.digestSha256(`${normalizedPin}::otp-pin-salt`);
-        const ok = plainDigest === savedHash || legacySaltDigest === savedHash;
-        if (ok) {
-          await this.savePin(normalizedPin);
-        }
-        return ok;
-      }
-
-      const legacySaltDigest = await this.digestSha256(`${normalizedPin}::otp-pin-salt`);
-      return legacySaltDigest === savedHash;
-    }
-
-    return false;
-  }
-
-  async savePin(pin: string): Promise<void> {
-    const hash = await this.hashPin(pin);
-    await storageService.setPinHash(hash);
   }
 
   async encryptString(value: string, keyMaterial: string): Promise<string> {
@@ -203,4 +151,3 @@ class CryptoService {
 }
 
 export const cryptoService = new CryptoService();
-

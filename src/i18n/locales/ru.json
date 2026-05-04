@@ -18,17 +18,17 @@
   },
   "lock": {
     "title": "Приложение заблокировано",
-    "subtitle": "Введите 4-значный PIN, чтобы продолжить.",
-    "unlockWithPin": "Разблокировать PIN-кодом",
-    "wrongPin": "Неверный PIN. Попробуйте снова.",
-    "biometricFailed": "Биометрия не сработала. Введите PIN.",
-    "failedAttempts": "Неудачных попыток: {{count}}",
-    "biometricPrompt": "Разблокируйте аутентификатор",
-    "biometricFallback": "Использовать PIN"
-  },
-  "biometricPrompt": {
-    "subtitle": "Разблокировать Face ID / Touch ID",
-    "useBiometrics": "Использовать биометрию"
+    "subtitleDevice": "Подтвердите личность через Face ID, Touch ID или код-пароль устройства.",
+    "deviceAuthPrompt": "Разблокировать аутентификатор",
+    "deviceAuthFallback": "Ввести код-пароль",
+    "deviceAuthFailed": "Вход не завершён. Попробуйте снова.",
+    "deviceAuthCardHint": "Face ID, Touch ID или код-пароль устройства",
+    "deviceAuthButton": "Разблокировать",
+    "deviceAuthUnavailable": "На этом устройстве нельзя использовать Face ID, Touch ID или код-пароль для входа в приложение. Защиту можно отключить в настройках.",
+    "disableProtectionTitle": "Отключить защиту?",
+    "disableProtectionBody": "Позже её снова можно включить в настройках (Premium).",
+    "disableProtectionConfirm": "Отключить",
+    "disableProtectionCta": "Отключить защиту и продолжить"
   },
   "app": {
     "welcome": "Откройте App.tsx, чтобы начать работу над приложением."
@@ -127,34 +127,19 @@
     "about": "О приложении",
     "more": "Дополнительно",
     "developer": "Разработка",
-    "pin": "PIN-код",
-    "pinOn": "Включён",
-    "pinOff": "Не задан",
-    "pinSetUp": "Настроить",
-    "pinChange": "Изменить",
-    "biometric": "Биометрия",
-    "biometricHint": "Face ID или Touch ID на экране блокировки.",
-    "biometricPremiumHint": "Premium — разблокируйте вход по Face ID / Touch ID.",
-    "biometricNeedsPinHint": "Сначала задайте PIN.",
-    "biometricNoHardwareHint": "На устройстве недоступна биометрия.",
-    "biometricNeedsPinTitle": "Нужен PIN",
-    "biometricNeedsPinBody": "Создайте PIN, прежде чем включать биометрию.",
-    "biometricUnavailableTitle": "Биометрия недоступна",
-    "biometricUnavailableBody": "Настройте Face ID или Touch ID в системных настройках и повторите попытку.",
-    "biometricEnablePrompt": "Подтвердите включение биометрии",
+    "deviceAuth": "Защита приложения",
+    "deviceAuthHint": "При уходе из приложения — разблокировка через Face ID, Touch ID или код-пароль устройства.",
+    "deviceAuthPremiumHint": "Premium — блокировка при уходе и вход системными средствами.",
+    "deviceAuthNoHardwareHint": "Настройте Face ID, Touch ID или код-пароль устройства в системных настройках.",
+    "deviceAuthUnavailableTitle": "Недоступно",
+    "deviceAuthUnavailableBody": "Настройте Face ID, Touch ID или код-пароль устройства в системных настройках и повторите попытку.",
+    "deviceAuthEnablePrompt": "Подтвердите включение защиты приложения",
+    "lockNowHint": "Сразу открыть экран блокировки",
     "themeLight": "Светлая",
     "themeDark": "Тёмная",
     "themeSystem": "Как в системе",
     "aboutApp": "Приложение",
     "aboutVersion": "Версия",
     "premiumActive": "Premium активен"
-  },
-  "setupPin": {
-    "title": "PIN",
-    "phaseCurrent": "Введите текущий PIN",
-    "phaseNew": "Введите новый PIN",
-    "phaseConfirm": "Подтвердите новый PIN",
-    "mismatch": "PIN не совпадают. Попробуйте снова.",
-    "wrongCurrent": "Неверный PIN. Попробуйте снова."
   }
 }

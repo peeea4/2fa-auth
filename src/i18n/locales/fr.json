@@ -18,17 +18,17 @@
   },
   "lock": {
     "title": "Application verrouillée",
-    "subtitle": "Saisissez votre code PIN à 4 chiffres pour continuer.",
-    "unlockWithPin": "Déverrouiller avec le PIN",
-    "wrongPin": "PIN incorrect. Réessayez.",
-    "biometricFailed": "Échec biométrique. Saisissez votre PIN.",
-    "failedAttempts": "Tentatives échouées : {{count}}",
-    "biometricPrompt": "Déverrouillez votre authentificateur",
-    "biometricFallback": "Utiliser le PIN"
-  },
-  "biometricPrompt": {
-    "subtitle": "Déverrouiller avec Face ID / Touch ID",
-    "useBiometrics": "Utiliser la biométrie"
+    "subtitleDevice": "Confirmez avec Face ID, Touch ID ou le code d’accès de l’appareil.",
+    "deviceAuthPrompt": "Déverrouiller l’authentificateur",
+    "deviceAuthFallback": "Utiliser le code",
+    "deviceAuthFailed": "L’authentification n’a pas abouti. Réessayez.",
+    "deviceAuthCardHint": "Face ID, Touch ID ou code de l’appareil",
+    "deviceAuthButton": "Déverrouiller",
+    "deviceAuthUnavailable": "Cet appareil ne peut pas utiliser Face ID, Touch ID ou le code pour cette app. Vous pouvez désactiver la protection dans Réglages.",
+    "disableProtectionTitle": "Désactiver la protection ?",
+    "disableProtectionBody": "Vous pourrez la réactiver plus tard dans Réglages (Premium).",
+    "disableProtectionConfirm": "Désactiver",
+    "disableProtectionCta": "Désactiver la protection et continuer"
   },
   "app": {
     "welcome": "Ouvrez App.tsx pour commencer a travailler sur votre application."
@@ -127,34 +127,19 @@
     "about": "À propos",
     "more": "Plus",
     "developer": "Développement",
-    "pin": "Code PIN",
-    "pinOn": "Activé",
-    "pinOff": "Non défini",
-    "pinSetUp": "Configurer",
-    "pinChange": "Modifier",
-    "biometric": "Déverrouillage biométrique",
-    "biometricHint": "Face ID ou Touch ID sur l’écran de verrouillage.",
-    "biometricPremiumHint": "Premium — débloquez Face ID / Touch ID au verrouillage.",
-    "biometricNeedsPinHint": "Définissez d’abord un code PIN.",
-    "biometricNoHardwareHint": "La biométrie n’est pas disponible sur cet appareil.",
-    "biometricNeedsPinTitle": "PIN requis",
-    "biometricNeedsPinBody": "Créez un code PIN avant d’activer la biométrie.",
-    "biometricUnavailableTitle": "Biométrie indisponible",
-    "biometricUnavailableBody": "Configurez Face ID ou Touch ID dans les réglages système, puis réessayez.",
-    "biometricEnablePrompt": "Confirmez pour activer le déverrouillage biométrique",
+    "deviceAuth": "Protection de l’app",
+    "deviceAuthHint": "En quittant l’app, déverrouillez avec Face ID, Touch ID ou le code de l’appareil.",
+    "deviceAuthPremiumHint": "Premium — verrouillage à la sortie et déverrouillage via le système.",
+    "deviceAuthNoHardwareHint": "Configurez Face ID, Touch ID ou un code dans les réglages système.",
+    "deviceAuthUnavailableTitle": "Indisponible",
+    "deviceAuthUnavailableBody": "Configurez Face ID, Touch ID ou un code dans les réglages système, puis réessayez.",
+    "deviceAuthEnablePrompt": "Confirmez pour activer la protection de l’app",
+    "lockNowHint": "Ouvrir l’écran de verrouillage maintenant",
     "themeLight": "Clair",
     "themeDark": "Sombre",
     "themeSystem": "Système",
     "aboutApp": "Application",
     "aboutVersion": "Version",
     "premiumActive": "Premium actif"
-  },
-  "setupPin": {
-    "title": "PIN",
-    "phaseCurrent": "Saisissez votre PIN actuel",
-    "phaseNew": "Saisissez un nouveau PIN",
-    "phaseConfirm": "Confirmez le nouveau PIN",
-    "mismatch": "Les PIN ne correspondent pas. Réessayez.",
-    "wrongCurrent": "PIN incorrect. Réessayez."
   }
 }

@@ -18,17 +18,17 @@
   },
   "lock": {
     "title": "App bloqueada",
-    "subtitle": "Introduce tu PIN de 4 dígitos para continuar.",
-    "unlockWithPin": "Desbloquear con PIN",
-    "wrongPin": "PIN incorrecto. Inténtalo de nuevo.",
-    "biometricFailed": "Falló la biometría. Introduce tu PIN.",
-    "failedAttempts": "Intentos fallidos: {{count}}",
-    "biometricPrompt": "Desbloquea tu autenticador",
-    "biometricFallback": "Usar PIN"
-  },
-  "biometricPrompt": {
-    "subtitle": "Desbloquear con Face ID / Touch ID",
-    "useBiometrics": "Usar biometría"
+    "subtitleDevice": "Confirma con Face ID, Touch ID o el código de acceso del dispositivo.",
+    "deviceAuthPrompt": "Desbloquear autenticador",
+    "deviceAuthFallback": "Usar código",
+    "deviceAuthFailed": "No se completó la autenticación. Inténtalo de nuevo.",
+    "deviceAuthCardHint": "Face ID, Touch ID o código del dispositivo",
+    "deviceAuthButton": "Desbloquear",
+    "deviceAuthUnavailable": "Este dispositivo no puede usar Face ID, Touch ID ni el código para esta app. Puedes desactivar la protección en Ajustes.",
+    "disableProtectionTitle": "¿Desactivar la protección?",
+    "disableProtectionBody": "Podrás activarla de nuevo en Ajustes (Premium).",
+    "disableProtectionConfirm": "Desactivar",
+    "disableProtectionCta": "Desactivar protección y continuar"
   },
   "app": {
     "welcome": "Abre App.tsx para comenzar a trabajar en tu aplicacion."
@@ -127,34 +127,19 @@
     "about": "Acerca de",
     "more": "Más",
     "developer": "Desarrollo",
-    "pin": "PIN",
-    "pinOn": "Activado",
-    "pinOff": "Sin configurar",
-    "pinSetUp": "Configurar",
-    "pinChange": "Cambiar",
-    "biometric": "Desbloqueo biométrico",
-    "biometricHint": "Face ID o Touch ID en la pantalla de bloqueo.",
-    "biometricPremiumHint": "Premium — desbloquea Face ID / Touch ID en el bloqueo.",
-    "biometricNeedsPinHint": "Primero configura un PIN.",
-    "biometricNoHardwareHint": "La biometría no está disponible en este dispositivo.",
-    "biometricNeedsPinTitle": "Se necesita PIN",
-    "biometricNeedsPinBody": "Crea un PIN antes de activar la biometría.",
-    "biometricUnavailableTitle": "Biometría no disponible",
-    "biometricUnavailableBody": "Configura Face ID o Touch ID en Ajustes del sistema e inténtalo de nuevo.",
-    "biometricEnablePrompt": "Confirma para activar el desbloqueo biométrico",
+    "deviceAuth": "Protección de la app",
+    "deviceAuthHint": "Al salir de la app, desbloquea con Face ID, Touch ID o el código del dispositivo.",
+    "deviceAuthPremiumHint": "Premium — bloqueo al salir y desbloqueo con métodos del sistema.",
+    "deviceAuthNoHardwareHint": "Configura Face ID, Touch ID o un código en los ajustes del sistema.",
+    "deviceAuthUnavailableTitle": "No disponible",
+    "deviceAuthUnavailableBody": "Configura Face ID, Touch ID o un código en los ajustes del sistema e inténtalo de nuevo.",
+    "deviceAuthEnablePrompt": "Confirma para activar la protección de la app",
+    "lockNowHint": "Abrir la pantalla de bloqueo ahora",
     "themeLight": "Claro",
     "themeDark": "Oscuro",
     "themeSystem": "Sistema",
     "aboutApp": "App",
     "aboutVersion": "Versión",
     "premiumActive": "Premium activo"
-  },
-  "setupPin": {
-    "title": "PIN",
-    "phaseCurrent": "Introduce tu PIN actual",
-    "phaseNew": "Introduce un PIN nuevo",
-    "phaseConfirm": "Confirma el PIN nuevo",
-    "mismatch": "Los PIN no coinciden. Inténtalo de nuevo.",
-    "wrongCurrent": "PIN incorrecto. Inténtalo de nuevo."
   }
 }

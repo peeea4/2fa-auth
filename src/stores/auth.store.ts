@@ -5,28 +5,22 @@ import { mmkvStorage } from './mmkv-storage';
 
 export type AuthStoreState = {
   isLocked: boolean;
-  isPinSet: boolean;
+  /** Premium: при уходе в фон блокировать и разблокировать через системный LocalAuthentication. */
   isBiometricEnabled: boolean;
-  failedAttempts: number;
 };
 
 type AuthStoreActions = {
   lock: () => void;
   unlock: () => void;
-  setPinSet: (isPinSet: boolean) => void;
   setBiometricEnabled: (isEnabled: boolean) => void;
-  incrementFailedAttempts: () => void;
-  resetFailedAttempts: () => void;
   resetAuthState: () => void;
 };
 
 type AuthStore = AuthStoreState & AuthStoreActions;
 
 const initialState: AuthStoreState = {
-  isLocked: true,
-  isPinSet: false,
+  isLocked: false,
   isBiometricEnabled: false,
-  failedAttempts: 0,
 };
 
 export const useAuthStore = create<AuthStore>()(
@@ -37,19 +31,10 @@ export const useAuthStore = create<AuthStore>()(
         set({ isLocked: true });
       },
       unlock: () => {
-        set({ isLocked: false, failedAttempts: 0 });
-      },
-      setPinSet: (isPinSet) => {
-        set({ isPinSet });
+        set({ isLocked: false });
       },
       setBiometricEnabled: (isEnabled) => {
         set({ isBiometricEnabled: isEnabled });
-      },
-      incrementFailedAttempts: () => {
-        set((state) => ({ failedAttempts: state.failedAttempts + 1 }));
-      },
-      resetFailedAttempts: () => {
-        set({ failedAttempts: 0 });
       },
       resetAuthState: () => {
         set(initialState);
@@ -58,7 +43,22 @@ export const useAuthStore = create<AuthStore>()(
     {
       name: 'auth.store',
       storage: createJSONStorage(() => mmkvStorage),
+      partialize: (state) => ({
+        isLocked: state.isLocked,
+        isBiometricEnabled: state.isBiometricEnabled,
+      }),
+      merge: (persisted, current) => {
+        if (!persisted || typeof persisted !== 'object') {
+          return current;
+        }
+        const p = persisted as Partial<AuthStoreState>;
+        return {
+          ...current,
+          isLocked: typeof p.isLocked === 'boolean' ? p.isLocked : current.isLocked,
+          isBiometricEnabled:
+            typeof p.isBiometricEnabled === 'boolean' ? p.isBiometricEnabled : current.isBiometricEnabled,
+        };
+      },
     },
   ),
 );
-
