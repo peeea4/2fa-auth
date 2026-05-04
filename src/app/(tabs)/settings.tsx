@@ -161,20 +161,22 @@ export default function SettingsScreen() {
           ) : null}
         </View>
 
-        <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>{t('settingsScreen.appearance')}</Text>
-        <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+        <Text style={[styles.sectionTitle, styles.sectionTitleList, { color: colors.textMuted }]}>
+          {t('settingsScreen.appearance')}
+        </Text>
+        <View style={[styles.card, styles.cardSelectList, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           {THEME_OPTIONS.map((option, index) => {
             const selected = theme === option.value;
             return (
               <View key={option.value}>
-                {index > 0 ? <View style={[styles.divider, { backgroundColor: colors.border }]} /> : null}
+                {index > 0 ? <View style={[styles.dividerList, { backgroundColor: colors.border }]} /> : null}
                 <Pressable
                   accessibilityRole="button"
                   accessibilityState={{ selected }}
                   onPress={() => {
                     setTheme(option.value);
                   }}
-                  style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
+                  style={({ pressed }) => [styles.row, styles.rowSelectList, pressed && styles.rowPressed]}
                 >
                   <View style={styles.rowSingleMain}>
                     <Text style={[styles.rowLabel, { color: colors.text }]} numberOfLines={2}>
@@ -190,20 +192,22 @@ export default function SettingsScreen() {
           })}
         </View>
 
-        <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>{t('settingsScreen.language')}</Text>
-        <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+        <Text style={[styles.sectionTitle, styles.sectionTitleList, { color: colors.textMuted }]}>
+          {t('settingsScreen.language')}
+        </Text>
+        <View style={[styles.card, styles.cardSelectList, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           {SUPPORTED_LANGUAGES.map((code, index) => {
             const selected = i18n.language.startsWith(code);
             return (
               <View key={code}>
-                {index > 0 ? <View style={[styles.divider, { backgroundColor: colors.border }]} /> : null}
+                {index > 0 ? <View style={[styles.dividerList, { backgroundColor: colors.border }]} /> : null}
                 <Pressable
                   accessibilityRole="button"
                   accessibilityState={{ selected }}
                   onPress={() => {
                     handleLanguagePress(code);
                   }}
-                  style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
+                  style={({ pressed }) => [styles.row, styles.rowSelectList, pressed && styles.rowPressed]}
                 >
                   <View style={styles.rowSingleMain}>
                     <Text style={[styles.rowLabel, { color: colors.text }]} numberOfLines={1}>
@@ -309,11 +313,20 @@ const styles = StyleSheet.create({
     marginTop: 16,
     marginBottom: 4,
   },
+  /** Доп. воздух над карточками выбора (оформление / язык). */
+  sectionTitleList: {
+    marginBottom: 8,
+  },
   card: {
     borderRadius: 14,
     borderWidth: 1,
     paddingVertical: 4,
     gap: 0,
+  },
+  /** Карточка со списком опций: отступы от рамки до первой/последней строки. */
+  cardSelectList: {
+    paddingVertical: 8,
+    paddingHorizontal: 2,
   },
   row: {
     flexDirection: 'row',
@@ -324,6 +337,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 14,
     minHeight: 52,
+  },
+  /** Строки в списках «Оформление» и «Язык интерфейса». */
+  rowSelectList: {
+    paddingHorizontal: 18,
+    paddingVertical: 16,
+    minHeight: 56,
   },
   rowPressed: {
     opacity: 0.85,
@@ -361,7 +380,12 @@ const styles = StyleSheet.create({
   },
   divider: {
     height: StyleSheet.hairlineWidth,
-    marginLeft: 16,
+    marginHorizontal: 16,
+  },
+  /** Разделитель внутри списков выбора — те же горизонтальные поля, что у строки. */
+  dividerList: {
+    height: StyleSheet.hairlineWidth,
+    marginHorizontal: 18,
   },
   cardBody: {
     padding: 16,
