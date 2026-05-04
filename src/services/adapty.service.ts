@@ -1,4 +1,10 @@
-import { adapty, createPaywallView, type AdaptyPaywall, type AdaptyPaywallProduct, type AdaptyProfile } from 'react-native-adapty';
+import {
+  adapty,
+  createPaywallView,
+  type AdaptyPaywall,
+  type AdaptyPaywallProduct,
+  type AdaptyProfile,
+} from 'react-native-adapty';
 
 import type { PremiumState } from '../types/adapty.types';
 
@@ -21,6 +27,11 @@ export type PaywallData = {
   paywall: AdaptyPaywall;
   products: AdaptyPaywallProduct[];
 };
+
+export type PurchaseProductResult =
+  | { kind: 'success'; premium: PremiumState }
+  | { kind: 'user_cancelled' }
+  | { kind: 'pending' };
 
 class AdaptyService {
   private isInitialized = false;
@@ -119,6 +130,26 @@ class AdaptyService {
     await this.ensureInitialized();
     const profile = await adapty.restorePurchases();
     return this.mapProfileToPremiumState(profile, this.accessLevelId);
+  }
+
+  async purchaseProduct(product: AdaptyPaywallProduct): Promise<PurchaseProductResult> {
+    await this.ensureInitialized();
+    const result = await adapty.makePurchase(product);
+    if (result.type === 'success') {
+      return {
+        kind: 'success',
+        premium: this.mapProfileToPremiumState(result.profile, this.accessLevelId),
+      };
+    }
+    if (result.type === 'user_cancelled') {
+      return { kind: 'user_cancelled' };
+    }
+    return { kind: 'pending' };
+  }
+
+  async logPaywallShown(paywall: AdaptyPaywall): Promise<void> {
+    await this.ensureInitialized();
+    await adapty.logShowPaywall(paywall);
   }
 }
 
