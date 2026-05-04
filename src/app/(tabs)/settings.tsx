@@ -124,16 +124,18 @@ export default function SettingsScreen() {
                     : t('settingsScreen.deviceAuthHint')}
               </Text>
             </View>
-            <Switch
-              accessibilityLabel={t('settingsScreen.deviceAuth')}
-              disabled={deviceAuthSwitchDisabled}
-              ios_backgroundColor={isDark ? colors.border : undefined}
-              onValueChange={(value) => {
-                void handleDeviceAuthToggle(value);
-              }}
-              trackColor={{ false: colors.border, true: colors.primary }}
-              value={deviceAuthSwitchValue}
-            />
+            <View style={styles.rowTrailing}>
+              <Switch
+                accessibilityLabel={t('settingsScreen.deviceAuth')}
+                disabled={deviceAuthSwitchDisabled}
+                ios_backgroundColor={isDark ? colors.border : undefined}
+                onValueChange={(value) => {
+                  void handleDeviceAuthToggle(value);
+                }}
+                trackColor={{ false: colors.border, true: colors.primary }}
+                value={deviceAuthSwitchValue}
+              />
+            </View>
           </View>
 
           {canLockNow ? (
@@ -151,7 +153,9 @@ export default function SettingsScreen() {
                   <Text style={[styles.rowLabel, { color: colors.text }]}>{t('lockApp')}</Text>
                   <Text style={[styles.rowHint, { color: colors.textMuted }]}>{t('settingsScreen.lockNowHint')}</Text>
                 </View>
-                <ChevronRight color={colors.textMuted} size={20} />
+                <View style={styles.rowTrailing}>
+                  <ChevronRight color={colors.textMuted} size={20} />
+                </View>
               </Pressable>
             </>
           ) : null}
@@ -172,8 +176,14 @@ export default function SettingsScreen() {
                   }}
                   style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
                 >
-                  <Text style={[styles.rowLabel, { color: colors.text }]}>{t(option.labelKey)}</Text>
-                  {selected ? <Check color={colors.primary} size={22} strokeWidth={2.5} /> : null}
+                  <View style={styles.rowSingleMain}>
+                    <Text style={[styles.rowLabel, { color: colors.text }]} numberOfLines={2}>
+                      {t(option.labelKey)}
+                    </Text>
+                  </View>
+                  <View style={styles.rowTrailing}>
+                    {selected ? <Check color={colors.primary} size={22} strokeWidth={2.5} /> : null}
+                  </View>
                 </Pressable>
               </View>
             );
@@ -195,8 +205,14 @@ export default function SettingsScreen() {
                   }}
                   style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
                 >
-                  <Text style={[styles.rowLabel, { color: colors.text }]}>{LANGUAGE_LABELS[code]}</Text>
-                  {selected ? <Check color={colors.primary} size={22} strokeWidth={2.5} /> : null}
+                  <View style={styles.rowSingleMain}>
+                    <Text style={[styles.rowLabel, { color: colors.text }]} numberOfLines={1}>
+                      {LANGUAGE_LABELS[code]}
+                    </Text>
+                  </View>
+                  <View style={styles.rowTrailing}>
+                    {selected ? <Check color={colors.primary} size={22} strokeWidth={2.5} /> : null}
+                  </View>
                 </Pressable>
               </View>
             );
@@ -253,13 +269,15 @@ export default function SettingsScreen() {
                   <Text style={[styles.rowLabel, { color: colors.text }]}>{t('devPremiumToggle')}</Text>
                   <Text style={[styles.rowHint, { color: colors.textMuted }]}>{t('devPremiumHint')}</Text>
                 </View>
-                <Switch
-                  accessibilityLabel={t('devPremiumToggle')}
-                  ios_backgroundColor={isDark ? colors.border : undefined}
-                  onValueChange={setDevPremiumOverride}
-                  trackColor={{ false: colors.border, true: colors.primary }}
-                  value={devPremiumOverride}
-                />
+                <View style={styles.rowTrailing}>
+                  <Switch
+                    accessibilityLabel={t('devPremiumToggle')}
+                    ios_backgroundColor={isDark ? colors.border : undefined}
+                    onValueChange={setDevPremiumOverride}
+                    trackColor={{ false: colors.border, true: colors.primary }}
+                    value={devPremiumOverride}
+                  />
+                </View>
               </View>
             </View>
           </>
@@ -299,6 +317,7 @@ const styles = StyleSheet.create({
   },
   row: {
     flexDirection: 'row',
+    flexWrap: 'nowrap',
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: 12,
@@ -311,7 +330,23 @@ const styles = StyleSheet.create({
   },
   rowMain: {
     flex: 1,
+    minWidth: 0,
     gap: 4,
+    paddingRight: 4,
+  },
+  /** Одна колонка текста в строке (тема / язык) — чтобы иконка не уезжала вниз. */
+  rowSingleMain: {
+    flex: 1,
+    minWidth: 0,
+    paddingRight: 4,
+    justifyContent: 'center',
+  },
+  /** Фиксированная правая колонка под Switch / Check / Chevron. */
+  rowTrailing: {
+    flexShrink: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: 28,
   },
   rowLabel: {
     fontSize: 16,
