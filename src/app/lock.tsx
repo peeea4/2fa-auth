@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { BiometricPrompt, PinPad } from '../components/lock';
 import { Button } from '../components/ui';
+import { usePremium } from '../hooks/usePremium';
 import { useTheme } from '../hooks/useTheme';
 import { biometricService } from '../services/biometric.service';
 import { cryptoService } from '../services/crypto.service';
@@ -24,6 +25,8 @@ export default function LockScreen() {
   const failedAttempts = useAuthStore((state) => state.failedAttempts);
   const setPinSet = useAuthStore((state) => state.setPinSet);
   const isPinSet = useAuthStore((state) => state.isPinSet);
+  const isBiometricEnabled = useAuthStore((state) => state.isBiometricEnabled);
+  const { canUseBiometric } = usePremium();
 
   const [pinValue, setPinValue] = useState('');
   const [isSubmittingPin, setIsSubmittingPin] = useState(false);
@@ -81,7 +84,7 @@ export default function LockScreen() {
     }
   }, [t, unlock]);
 
-  const canPromptBiometric = biometricAvailable && isPinSet;
+  const canPromptBiometric = biometricAvailable && isPinSet && isBiometricEnabled && canUseBiometric;
 
   useEffect(() => {
     if (canPromptBiometric) {

@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
 import i18n from '../i18n';
-import { resolveAppLanguage } from '../i18n/resolve-language';
+import { resolveAppLanguage, SUPPORTED_LANGUAGES, type SupportedLanguage } from '../i18n/resolve-language';
 import { mmkvStorage } from './mmkv-storage';
 
 export type AppTheme = 'light' | 'dark' | 'system';
@@ -59,6 +59,7 @@ export const useSettingsStore = create<SettingsStore>()(
       storage: createJSONStorage(() => mmkvStorage),
       partialize: (state) => ({
         theme: state.theme,
+        language: state.language,
         isOnboardingCompleted: state.isOnboardingCompleted,
         devPremiumOverride: state.devPremiumOverride,
       }),
@@ -66,10 +67,17 @@ export const useSettingsStore = create<SettingsStore>()(
         if (!persistedState || typeof persistedState !== 'object') {
           return { ...currentState, language: resolveAppLanguage() };
         }
+        const partial = persistedState as Partial<SettingsState>;
+        const persistedLanguage = partial.language;
+        const language: SupportedLanguage =
+          typeof persistedLanguage === 'string' &&
+          SUPPORTED_LANGUAGES.includes(persistedLanguage as SupportedLanguage)
+            ? (persistedLanguage as SupportedLanguage)
+            : resolveAppLanguage();
         return {
           ...currentState,
-          ...(persistedState as Partial<SettingsState>),
-          language: resolveAppLanguage(),
+          ...partial,
+          language,
         };
       },
     },
