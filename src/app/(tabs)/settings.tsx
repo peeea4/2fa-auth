@@ -8,13 +8,13 @@ import { Alert, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 're
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '../../components/ui/Button';
+import type { AppTheme } from '../../constants/colors';
 import { config } from '../../constants/config';
 import { SUPPORTED_LANGUAGES, type SupportedLanguage } from '../../i18n/resolve-language';
 import { usePremium } from '../../hooks/usePremium';
 import { useTheme } from '../../hooks/useTheme';
 import { biometricService } from '../../services/biometric.service';
 import { useAuthStore, useSettingsStore } from '../../stores';
-import type { AppTheme } from '../../stores/settings.store';
 
 const LANGUAGE_LABELS: Record<SupportedLanguage, string> = {
   en: 'English',

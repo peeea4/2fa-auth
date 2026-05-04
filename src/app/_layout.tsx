@@ -1,8 +1,11 @@
+import '../../global.css';
+
 import { Stack } from 'expo-router';
 import { useEffect, useRef } from 'react';
 import { AppState } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { ThemeRoot } from '../components/theme';
 import i18n from '../i18n';
 import { usePremium } from '../hooks/usePremium';
 import { storageService } from '../services/storage.service';
@@ -42,15 +45,17 @@ export default function RootLayout() {
 
   return (
     <SafeAreaProvider>
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="index" />
-        <Stack.Screen name="onboarding/index" />
-        <Stack.Screen name="lock" />
-        <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="add" options={{ presentation: 'modal' }} />
-        <Stack.Screen name="paywall" options={{ presentation: 'modal' }} />
-        <Stack.Screen name="edit/[id]" options={{ presentation: 'modal' }} />
-      </Stack>
+      <ThemeRoot>
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="index" />
+          <Stack.Screen name="onboarding/index" />
+          <Stack.Screen name="lock" />
+          <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="add" options={{ presentation: 'modal' }} />
+          <Stack.Screen name="paywall" options={{ presentation: 'modal' }} />
+          <Stack.Screen name="edit/[id]" options={{ presentation: 'modal' }} />
+        </Stack>
+      </ThemeRoot>
     </SafeAreaProvider>
   );
 }

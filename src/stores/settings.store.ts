@@ -1,11 +1,12 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
+import type { AppTheme } from '../constants/colors';
 import i18n from '../i18n';
 import { resolveAppLanguage, SUPPORTED_LANGUAGES, type SupportedLanguage } from '../i18n/resolve-language';
 import { mmkvStorage } from './mmkv-storage';
 
-export type AppTheme = 'light' | 'dark' | 'system';
+export type { AppTheme } from '../constants/colors';
 
 export type SettingsState = {
   theme: AppTheme;
