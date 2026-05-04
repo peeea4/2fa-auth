@@ -1,9 +1,15 @@
 import { useCallback, useMemo, useState } from 'react';
 
-import { FREE_CODE_LIMIT } from '../constants/limits';
 import { adaptyService } from '../services/adapty.service';
 import { useOtpStore, usePremiumStore, useSettingsStore } from '../stores';
 import type { PremiumState } from '../types';
+import {
+  computeCanAddCode,
+  computeCanScanQr,
+  computeCanUseBiometric,
+  computeEffectiveIsPremium,
+  getFreeSlotsLeft,
+} from '../utils/premium-gating';
 
 type UsePremiumResult = {
   premium: PremiumState;
@@ -17,8 +23,6 @@ type UsePremiumResult = {
   restorePurchases: () => Promise<PremiumState>;
 };
 
-const getFreeSlotsLeft = (entriesCount: number): number => Math.max(0, FREE_CODE_LIMIT - entriesCount);
-
 export const usePremium = (): UsePremiumResult => {
   const [isCheckingStatus, setIsCheckingStatus] = useState(false);
   const [isRestoringPurchases, setIsRestoringPurchases] = useState(false);
@@ -30,7 +34,10 @@ export const usePremium = (): UsePremiumResult => {
   const setPremium = usePremiumStore((state) => state.setPremium);
   const devPremiumOverride = useSettingsStore((state) => state.devPremiumOverride);
 
-  const effectiveIsPremium = useMemo(() => isPremium || (__DEV__ && devPremiumOverride), [devPremiumOverride, isPremium]);
+  const effectiveIsPremium = useMemo(
+    () => computeEffectiveIsPremium(isPremium, devPremiumOverride, __DEV__),
+    [devPremiumOverride, isPremium],
+  );
 
   const syncSubscriptionStatus = useCallback(async (): Promise<PremiumState> => {
     setIsCheckingStatus(true);
@@ -55,7 +62,7 @@ export const usePremium = (): UsePremiumResult => {
   }, [setPremium]);
 
   const freeSlotsLeft = useMemo(() => getFreeSlotsLeft(entriesCount), [entriesCount]);
-  const canAddCode = effectiveIsPremium || freeSlotsLeft > 0;
+  const canAddCode = computeCanAddCode(effectiveIsPremium, entriesCount);
 
   const premiumDisplay = useMemo((): PremiumState => {
     if (effectiveIsPremium && !isPremium && __DEV__ && devPremiumOverride) {
@@ -77,8 +84,8 @@ export const usePremium = (): UsePremiumResult => {
     isCheckingStatus,
     isRestoringPurchases,
     canAddCode,
-    canScanQr: effectiveIsPremium,
-    canUseBiometric: effectiveIsPremium,
+    canScanQr: computeCanScanQr(effectiveIsPremium),
+    canUseBiometric: computeCanUseBiometric(effectiveIsPremium),
     freeSlotsLeft,
     syncSubscriptionStatus,
     restorePurchases,
