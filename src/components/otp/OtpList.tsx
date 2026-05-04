@@ -3,9 +3,9 @@ import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FlatList, Pressable, StyleSheet, Text, View, type ListRenderItem } from 'react-native';
 
-import { FREE_CODE_LIMIT } from '../../constants/limits';
 import { useTheme } from '../../hooks/useTheme';
 import type { OtpEntry } from '../../types';
+import { isOtpListCardLocked } from '../../utils/premium-gating';
 import { OtpCard } from './OtpCard';
 
 type OtpListProps = {
@@ -31,7 +31,7 @@ export function OtpList({
 
   const renderItem: ListRenderItem<OtpEntry> = useCallback(
     ({ item, index }) => {
-      const isLocked = !isPremium && index >= FREE_CODE_LIMIT;
+      const isLocked = isOtpListCardLocked(isPremium, index);
       const secret = isLocked ? null : (secretsById[item.id] ?? null);
 
       return (
