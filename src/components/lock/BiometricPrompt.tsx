@@ -20,9 +20,9 @@ export function BiometricPrompt({ isAvailable, isLoading = false, onPress }: Bio
   return (
     <View style={[styles.container, { borderColor: colors.border, backgroundColor: colors.surface }]}>
       <Fingerprint color={colors.primary} size={20} />
-      <Text style={[styles.text, { color: colors.text }]}>{t('biometricPrompt.subtitle')}</Text>
+      <Text style={[styles.text, { color: colors.text }]}>{t('lock.deviceAuthCardHint')}</Text>
       <Button
-        title={isLoading ? t('checking') : t('biometricPrompt.useBiometrics')}
+        title={isLoading ? t('checking') : t('lock.deviceAuthButton')}
         onPress={onPress}
         disabled={isLoading}
       />

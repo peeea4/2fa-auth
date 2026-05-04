@@ -74,16 +74,13 @@ class StorageService {
     await SecureStore.deleteItemAsync(getSecretKey(id), secureStoreOptions);
   }
 
-  async getPinHash(): Promise<string | null> {
-    return SecureStore.getItemAsync(config.otpPinHashKey, secureStoreOptions);
-  }
-
-  async setPinHash(hash: string): Promise<void> {
-    await SecureStore.setItemAsync(config.otpPinHashKey, hash, secureStoreOptions);
-  }
-
-  async deletePinHash(): Promise<void> {
-    await SecureStore.deleteItemAsync(config.otpPinHashKey, secureStoreOptions);
+  /** Удаляет устаревший PIN приложения из Keychain (раньше хранился в Secure Store). */
+  async deleteLegacyAppPinHash(): Promise<void> {
+    try {
+      await SecureStore.deleteItemAsync(config.legacyOtpPinHashKey, secureStoreOptions);
+    } catch {
+      // ключ мог отсутствовать
+    }
   }
 
   async clearOtpData(): Promise<void> {

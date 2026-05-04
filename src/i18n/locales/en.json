@@ -18,17 +18,17 @@
   },
   "lock": {
     "title": "App locked",
-    "subtitle": "Enter your 4-digit PIN to continue.",
-    "unlockWithPin": "Unlock with PIN",
-    "wrongPin": "Wrong PIN. Try again.",
-    "biometricFailed": "Biometric auth failed. Enter your PIN.",
-    "failedAttempts": "Failed attempts: {{count}}",
-    "biometricPrompt": "Unlock your authenticator",
-    "biometricFallback": "Use PIN"
-  },
-  "biometricPrompt": {
-    "subtitle": "Unlock with Face ID / Touch ID",
-    "useBiometrics": "Use biometrics"
+    "subtitleDevice": "Confirm with Face ID, Touch ID, or your device passcode.",
+    "deviceAuthPrompt": "Unlock authenticator",
+    "deviceAuthFallback": "Use passcode",
+    "deviceAuthFailed": "Authentication was not completed. Try again.",
+    "deviceAuthCardHint": "Face ID, Touch ID, or device passcode",
+    "deviceAuthButton": "Unlock",
+    "deviceAuthUnavailable": "This device cannot use Face ID, Touch ID, or a device passcode for this app. You can turn off app protection in Settings.",
+    "disableProtectionTitle": "Turn off protection?",
+    "disableProtectionBody": "You can enable it again later in Settings (Premium).",
+    "disableProtectionConfirm": "Turn off",
+    "disableProtectionCta": "Turn off protection and continue"
   },
   "app": {
     "welcome": "Open up App.tsx to start working on your app!"
@@ -127,34 +127,19 @@
     "about": "About",
     "more": "More",
     "developer": "Developer",
-    "pin": "PIN lock",
-    "pinOn": "Enabled",
-    "pinOff": "Not set",
-    "pinSetUp": "Set up",
-    "pinChange": "Change",
-    "biometric": "Biometric unlock",
-    "biometricHint": "Use Face ID or Touch ID on the lock screen.",
-    "biometricPremiumHint": "Premium — unlock Face ID / Touch ID for the lock screen.",
-    "biometricNeedsPinHint": "Set a PIN first to use biometrics.",
-    "biometricNoHardwareHint": "Biometrics are not available on this device.",
-    "biometricNeedsPinTitle": "PIN required",
-    "biometricNeedsPinBody": "Create a PIN before enabling biometric unlock.",
-    "biometricUnavailableTitle": "Biometrics unavailable",
-    "biometricUnavailableBody": "Set up Face ID or Touch ID in system settings, then try again.",
-    "biometricEnablePrompt": "Confirm to enable biometric unlock",
+    "deviceAuth": "App protection",
+    "deviceAuthHint": "When you leave the app, unlock with Face ID, Touch ID, or your device passcode.",
+    "deviceAuthPremiumHint": "Premium — lock the app and unlock with your device’s secure methods.",
+    "deviceAuthNoHardwareHint": "Set up Face ID, Touch ID, or a device passcode in system settings.",
+    "deviceAuthUnavailableTitle": "Not available",
+    "deviceAuthUnavailableBody": "Set up Face ID, Touch ID, or a device passcode in system settings, then try again.",
+    "deviceAuthEnablePrompt": "Confirm to enable app protection",
+    "lockNowHint": "Open the lock screen now",
     "themeLight": "Light",
     "themeDark": "Dark",
     "themeSystem": "System",
     "aboutApp": "App",
     "aboutVersion": "Version",
     "premiumActive": "Premium is active"
-  },
-  "setupPin": {
-    "title": "PIN",
-    "phaseCurrent": "Enter your current PIN",
-    "phaseNew": "Enter a new PIN",
-    "phaseConfirm": "Confirm the new PIN",
-    "mismatch": "PINs do not match. Try again.",
-    "wrongCurrent": "Incorrect PIN. Try again."
   }
 }

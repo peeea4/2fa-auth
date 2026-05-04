@@ -4,24 +4,15 @@ import { router } from 'expo-router';
 import { Check, ChevronRight } from 'lucide-react-native';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  Alert,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Switch,
-  Text,
-  View,
-} from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '../../components/ui/Button';
 import { config } from '../../constants/config';
+import { SUPPORTED_LANGUAGES, type SupportedLanguage } from '../../i18n/resolve-language';
 import { usePremium } from '../../hooks/usePremium';
 import { useTheme } from '../../hooks/useTheme';
 import { biometricService } from '../../services/biometric.service';
-import { storageService } from '../../services/storage.service';
-import { SUPPORTED_LANGUAGES, type SupportedLanguage } from '../../i18n/resolve-language';
 import { useAuthStore, useSettingsStore } from '../../stores';
 import type { AppTheme } from '../../stores/settings.store';
 
@@ -42,8 +33,6 @@ export default function SettingsScreen() {
   const { t, i18n } = useTranslation();
   const { colors, isDark, theme, setTheme } = useTheme();
   const lock = useAuthStore((state) => state.lock);
-  const isPinSet = useAuthStore((state) => state.isPinSet);
-  const setPinSet = useAuthStore((state) => state.setPinSet);
   const isBiometricEnabled = useAuthStore((state) => state.isBiometricEnabled);
   const setBiometricEnabled = useAuthStore((state) => state.setBiometricEnabled);
 
@@ -54,25 +43,19 @@ export default function SettingsScreen() {
 
   const { premium, canUseBiometric } = usePremium();
 
-  const [hasPinInKeychain, setHasPinInKeychain] = useState(false);
   const [biometricHardware, setBiometricHardware] = useState(false);
 
-  const refreshSecurityState = useCallback(() => {
+  const refreshBiometricAvailability = useCallback(() => {
     void (async () => {
-      const [pinHash, bioAvailable] = await Promise.all([
-        storageService.getPinHash(),
-        biometricService.isAvailable(),
-      ]);
-      setHasPinInKeychain(Boolean(pinHash));
-      setPinSet(Boolean(pinHash));
+      const bioAvailable = await biometricService.isAvailable();
       setBiometricHardware(bioAvailable);
     })();
-  }, [setPinSet]);
+  }, []);
 
   useFocusEffect(
     useCallback(() => {
-      refreshSecurityState();
-    }, [refreshSecurityState]),
+      refreshBiometricAvailability();
+    }, [refreshBiometricAvailability]),
   );
 
   useEffect(() => {
@@ -81,27 +64,12 @@ export default function SettingsScreen() {
     }
   }, [canUseBiometric, isBiometricEnabled, setBiometricEnabled]);
 
-  const pinActive = hasPinInKeychain || isPinSet;
-
-  const handlePinPress = () => {
-    if (pinActive) {
-      router.push('/setup-pin');
-      return;
-    }
-    lock();
-    router.replace('/lock');
-  };
-
-  const handleBiometricToggle = async (next: boolean) => {
+  const handleDeviceAuthToggle = async (next: boolean) => {
     if (!canUseBiometric) {
       return;
     }
-    if (!pinActive) {
-      Alert.alert(t('settingsScreen.biometricNeedsPinTitle'), t('settingsScreen.biometricNeedsPinBody'));
-      return;
-    }
     if (!biometricHardware) {
-      Alert.alert(t('settingsScreen.biometricUnavailableTitle'), t('settingsScreen.biometricUnavailableBody'));
+      Alert.alert(t('settingsScreen.deviceAuthUnavailableTitle'), t('settingsScreen.deviceAuthUnavailableBody'));
       return;
     }
     if (!next) {
@@ -109,9 +77,9 @@ export default function SettingsScreen() {
       return;
     }
     const result = await biometricService.authenticate({
-      promptMessage: t('settingsScreen.biometricEnablePrompt'),
+      promptMessage: t('settingsScreen.deviceAuthEnablePrompt'),
       cancelLabel: t('cancel'),
-      fallbackLabel: t('lock.biometricFallback'),
+      fallbackLabel: t('lock.deviceAuthFallback'),
     });
     if (result.success) {
       setBiometricEnabled(true);
@@ -129,8 +97,10 @@ export default function SettingsScreen() {
 
   const appVersion = Constants.expoConfig?.version ?? Constants.nativeAppVersion ?? '—';
 
-  const biometricSwitchDisabled = !canUseBiometric || !pinActive || !biometricHardware;
-  const biometricSwitchValue = Boolean(isBiometricEnabled && canUseBiometric && pinActive);
+  const deviceAuthSwitchDisabled = !canUseBiometric || !biometricHardware;
+  const deviceAuthSwitchValue = Boolean(isBiometricEnabled && canUseBiometric);
+
+  const canLockNow = canUseBiometric && isBiometricEnabled;
 
   return (
     <SafeAreaView edges={['top', 'left', 'right']} style={[styles.safe, { backgroundColor: colors.background }]}>
@@ -143,65 +113,48 @@ export default function SettingsScreen() {
 
         <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>{t('settingsScreen.security')}</Text>
         <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-          <Pressable
-            accessibilityRole="button"
-            onPress={handlePinPress}
-            style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
-          >
-            <View style={styles.rowMain}>
-              <Text style={[styles.rowLabel, { color: colors.text }]}>{t('settingsScreen.pin')}</Text>
-              <Text style={[styles.rowValue, { color: colors.textMuted }]}>
-                {pinActive ? t('settingsScreen.pinOn') : t('settingsScreen.pinOff')}
-              </Text>
-            </View>
-            <Text style={[styles.rowAction, { color: colors.primary }]}>
-              {pinActive ? t('settingsScreen.pinChange') : t('settingsScreen.pinSetUp')}
-            </Text>
-            <ChevronRight color={colors.textMuted} size={20} />
-          </Pressable>
-
-          <View style={[styles.divider, { backgroundColor: colors.border }]} />
-
           <View style={styles.row}>
             <View style={styles.rowMain}>
-              <Text style={[styles.rowLabel, { color: colors.text }]}>{t('settingsScreen.biometric')}</Text>
+              <Text style={[styles.rowLabel, { color: colors.text }]}>{t('settingsScreen.deviceAuth')}</Text>
               <Text style={[styles.rowHint, { color: colors.textMuted }]}>
                 {!canUseBiometric
-                  ? t('settingsScreen.biometricPremiumHint')
-                  : !pinActive
-                    ? t('settingsScreen.biometricNeedsPinHint')
-                    : !biometricHardware
-                      ? t('settingsScreen.biometricNoHardwareHint')
-                      : t('settingsScreen.biometricHint')}
+                  ? t('settingsScreen.deviceAuthPremiumHint')
+                  : !biometricHardware
+                    ? t('settingsScreen.deviceAuthNoHardwareHint')
+                    : t('settingsScreen.deviceAuthHint')}
               </Text>
             </View>
             <Switch
-              accessibilityLabel={t('settingsScreen.biometric')}
-              disabled={biometricSwitchDisabled}
+              accessibilityLabel={t('settingsScreen.deviceAuth')}
+              disabled={deviceAuthSwitchDisabled}
               ios_backgroundColor={isDark ? colors.border : undefined}
               onValueChange={(value) => {
-                void handleBiometricToggle(value);
+                void handleDeviceAuthToggle(value);
               }}
               trackColor={{ false: colors.border, true: colors.primary }}
-              value={biometricSwitchValue}
+              value={deviceAuthSwitchValue}
             />
           </View>
 
-          <View style={[styles.divider, { backgroundColor: colors.border }]} />
-
-          <Pressable
-            accessibilityRole="button"
-            onPress={() => {
-              lock();
-              router.replace('/lock');
-            }}
-            style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
-          >
-            <View style={styles.rowMain}>
-              <Text style={[styles.rowLabel, { color: colors.text }]}>{t('lockApp')}</Text>
-            </View>
-            <ChevronRight color={colors.textMuted} size={20} />
-          </Pressable>
+          {canLockNow ? (
+            <>
+              <View style={[styles.divider, { backgroundColor: colors.border }]} />
+              <Pressable
+                accessibilityRole="button"
+                onPress={() => {
+                  lock();
+                  router.replace('/lock');
+                }}
+                style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
+              >
+                <View style={styles.rowMain}>
+                  <Text style={[styles.rowLabel, { color: colors.text }]}>{t('lockApp')}</Text>
+                  <Text style={[styles.rowHint, { color: colors.textMuted }]}>{t('settingsScreen.lockNowHint')}</Text>
+                </View>
+                <ChevronRight color={colors.textMuted} size={20} />
+              </Pressable>
+            </>
+          ) : null}
         </View>
 
         <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>{t('settingsScreen.appearance')}</Text>
@@ -370,10 +323,6 @@ const styles = StyleSheet.create({
   rowHint: {
     fontSize: 13,
     lineHeight: 18,
-  },
-  rowAction: {
-    fontSize: 15,
-    fontWeight: '600',
   },
   divider: {
     height: StyleSheet.hairlineWidth,
