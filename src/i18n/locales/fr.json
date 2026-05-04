@@ -45,6 +45,8 @@
   "emptySubtitle": "Ajoutez votre premier compte pour générer des codes OTP.",
   "lockApp": "Verrouiller l’app",
   "showOnboardingAgain": "Revoir l’introduction",
+  "devPremiumToggle": "Aperçu Premium (dev)",
+  "devPremiumHint": "Comportement Premium : QR, pas d’overlay au-delà de 5 codes, etc. Ignoré en build release.",
   "tabCodes": "Codes",
   "homeHeading": "Codes d’authentification",
   "openPaywall": "Ouvrir l’abonnement",

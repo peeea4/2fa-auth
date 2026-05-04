@@ -11,12 +11,15 @@ export type SettingsState = {
   theme: AppTheme;
   language: string;
   isOnboardingCompleted: boolean;
+  /** Только в `__DEV__`: в продакшене игнорируется в логике Premium. */
+  devPremiumOverride: boolean;
 };
 
 type SettingsActions = {
   setTheme: (theme: AppTheme) => void;
   setLanguage: (language: string) => void;
   setOnboardingCompleted: (isCompleted: boolean) => void;
+  setDevPremiumOverride: (value: boolean) => void;
   resetSettings: () => void;
 };
 
@@ -26,6 +29,7 @@ const initialState: SettingsState = {
   theme: 'system',
   language: resolveAppLanguage(),
   isOnboardingCompleted: false,
+  devPremiumOverride: false,
 };
 
 export const useSettingsStore = create<SettingsStore>()(
@@ -42,6 +46,9 @@ export const useSettingsStore = create<SettingsStore>()(
       setOnboardingCompleted: (isCompleted) => {
         set({ isOnboardingCompleted: isCompleted });
       },
+      setDevPremiumOverride: (value) => {
+        set({ devPremiumOverride: value });
+      },
       resetSettings: () => {
         set({ ...initialState, language: resolveAppLanguage() });
         void i18n.changeLanguage(resolveAppLanguage());
@@ -53,6 +60,7 @@ export const useSettingsStore = create<SettingsStore>()(
       partialize: (state) => ({
         theme: state.theme,
         isOnboardingCompleted: state.isOnboardingCompleted,
+        devPremiumOverride: state.devPremiumOverride,
       }),
       merge: (persistedState, currentState) => {
         if (!persistedState || typeof persistedState !== 'object') {

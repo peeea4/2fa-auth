@@ -45,6 +45,8 @@
   "emptySubtitle": "Add your first account to start generating OTP codes.",
   "lockApp": "Lock app",
   "showOnboardingAgain": "Show onboarding again",
+  "devPremiumToggle": "Premium preview (dev)",
+  "devPremiumHint": "Treats the app as Premium: QR scan, no 5-code lock overlay, and premium gates from usePremium. Release builds ignore this.",
   "tabCodes": "Codes",
   "homeHeading": "Authenticator codes",
   "openPaywall": "Open subscription",

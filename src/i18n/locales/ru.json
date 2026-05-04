@@ -45,6 +45,8 @@
   "emptySubtitle": "Добавьте первый аккаунт, чтобы генерировать OTP-коды.",
   "lockApp": "Заблокировать приложение",
   "showOnboardingAgain": "Показать онбординг снова",
+  "devPremiumToggle": "Premium в dev",
+  "devPremiumHint": "Приложение ведёт себя как Premium: QR, без оверлея на 6+ кодах и остальные проверки из usePremium. В release-сборке переключатель скрыт и не влияет.",
   "tabCodes": "Коды",
   "homeHeading": "Коды аутентификатора",
   "openPaywall": "Открыть подписку",

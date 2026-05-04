@@ -2,7 +2,7 @@ import { useCallback, useMemo, useState } from 'react';
 
 import { FREE_CODE_LIMIT } from '../constants/limits';
 import { adaptyService } from '../services/adapty.service';
-import { useOtpStore, usePremiumStore } from '../stores';
+import { useOtpStore, usePremiumStore, useSettingsStore } from '../stores';
 import type { PremiumState } from '../types';
 
 type UsePremiumResult = {
@@ -28,6 +28,9 @@ export const usePremium = (): UsePremiumResult => {
   const expiresAt = usePremiumStore((state) => state.expiresAt);
   const productId = usePremiumStore((state) => state.productId);
   const setPremium = usePremiumStore((state) => state.setPremium);
+  const devPremiumOverride = useSettingsStore((state) => state.devPremiumOverride);
+
+  const effectiveIsPremium = useMemo(() => isPremium || (__DEV__ && devPremiumOverride), [devPremiumOverride, isPremium]);
 
   const syncSubscriptionStatus = useCallback(async (): Promise<PremiumState> => {
     setIsCheckingStatus(true);
@@ -52,19 +55,30 @@ export const usePremium = (): UsePremiumResult => {
   }, [setPremium]);
 
   const freeSlotsLeft = useMemo(() => getFreeSlotsLeft(entriesCount), [entriesCount]);
-  const canAddCode = isPremium || freeSlotsLeft > 0;
+  const canAddCode = effectiveIsPremium || freeSlotsLeft > 0;
 
-  return {
-    premium: {
+  const premiumDisplay = useMemo((): PremiumState => {
+    if (effectiveIsPremium && !isPremium && __DEV__ && devPremiumOverride) {
+      return {
+        isPremium: true,
+        expiresAt: null,
+        productId: 'dev_preview',
+      };
+    }
+    return {
       isPremium,
       expiresAt,
       productId,
-    },
+    };
+  }, [devPremiumOverride, effectiveIsPremium, expiresAt, isPremium, productId]);
+
+  return {
+    premium: premiumDisplay,
     isCheckingStatus,
     isRestoringPurchases,
     canAddCode,
-    canScanQr: isPremium,
-    canUseBiometric: isPremium,
+    canScanQr: effectiveIsPremium,
+    canUseBiometric: effectiveIsPremium,
     freeSlotsLeft,
     syncSubscriptionStatus,
     restorePurchases,

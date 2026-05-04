@@ -45,6 +45,8 @@
   "emptySubtitle": "Agrega tu primera cuenta para generar códigos OTP.",
   "lockApp": "Bloquear app",
   "showOnboardingAgain": "Ver introducción otra vez",
+  "devPremiumToggle": "Vista previa Premium (dev)",
+  "devPremiumHint": "La app se comporta como Premium: QR, sin bloqueo del 6.º código y demás comprobaciones de usePremium. En release no aplica.",
   "tabCodes": "Códigos",
   "homeHeading": "Códigos del autenticador",
   "openPaywall": "Abrir suscripción",
