@@ -1,4 +1,3 @@
-import * as Crypto from 'expo-crypto';
 import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -9,14 +8,11 @@ import { BiometricPrompt, PinPad } from '../components/lock';
 import { Button } from '../components/ui';
 import { useTheme } from '../hooks/useTheme';
 import { biometricService } from '../services/biometric.service';
+import { cryptoService } from '../services/crypto.service';
 import { storageService } from '../services/storage.service';
 import { useAuthStore } from '../stores';
 
 const PIN_LENGTH = 4;
-
-const hashPin = async (pin: string): Promise<string> => {
-  return Crypto.digestStringAsync(Crypto.CryptoDigestAlgorithm.SHA256, pin);
-};
 
 export default function LockScreen() {
   const { t } = useTranslation();
@@ -27,7 +23,7 @@ export default function LockScreen() {
   const incrementFailedAttempts = useAuthStore((state) => state.incrementFailedAttempts);
   const failedAttempts = useAuthStore((state) => state.failedAttempts);
   const setPinSet = useAuthStore((state) => state.setPinSet);
-  const isBiometricEnabled = useAuthStore((state) => state.isBiometricEnabled);
+  const isPinSet = useAuthStore((state) => state.isPinSet);
 
   const [pinValue, setPinValue] = useState('');
   const [isSubmittingPin, setIsSubmittingPin] = useState(false);
@@ -85,11 +81,13 @@ export default function LockScreen() {
     }
   }, [t, unlock]);
 
+  const canPromptBiometric = biometricAvailable && isPinSet;
+
   useEffect(() => {
-    if (isBiometricEnabled && biometricAvailable) {
+    if (canPromptBiometric) {
       void handleBiometricUnlock();
     }
-  }, [biometricAvailable, handleBiometricUnlock, isBiometricEnabled]);
+  }, [biometricAvailable, canPromptBiometric, handleBiometricUnlock]);
 
   const handlePinSubmit = useCallback(
     async (enteredPin: string) => {
@@ -98,16 +96,16 @@ export default function LockScreen() {
 
       try {
         const existingPinHash = await storageService.getPinHash();
-        const enteredPinHash = await hashPin(enteredPin);
 
         if (!existingPinHash) {
-          await storageService.setPinHash(enteredPinHash);
+          await cryptoService.savePin(enteredPin);
           setPinSet(true);
           unlock();
           return;
         }
 
-        if (existingPinHash === enteredPinHash) {
+        const isValid = await cryptoService.verifyPin(enteredPin, existingPinHash);
+        if (isValid) {
           unlock();
           return;
         }
@@ -152,7 +150,7 @@ export default function LockScreen() {
         />
 
         <BiometricPrompt
-          isAvailable={isBiometricEnabled && biometricAvailable}
+          isAvailable={canPromptBiometric}
           isLoading={isSubmittingBiometric}
           onPress={() => {
             void handleBiometricUnlock();

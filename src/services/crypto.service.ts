@@ -140,19 +140,35 @@ class CryptoService {
       return false;
     }
 
-    const [scheme, salt, expectedHash] = savedHash.split(':');
-    if (!scheme || !salt || !expectedHash) {
-      // Legacy format compatibility.
-      const legacyHash = await this.digestSha256(`${pin.trim()}::otp-pin-salt`);
-      return savedHash === legacyHash;
+    const normalizedPin = pin.trim();
+
+    const segments = savedHash.split(':');
+    if (segments.length >= 3 && segments[0] === PIN_HASH_PREFIX) {
+      const [, salt, expectedHash] = segments;
+      if (!salt || !expectedHash) {
+        return false;
+      }
+      const currentHash = await this.digestSha256(`${PIN_HASH_PREFIX}:${salt}:${normalizedPin}:${PIN_HASH_PEPPER}`);
+      return currentHash === expectedHash;
     }
 
-    if (scheme !== PIN_HASH_PREFIX) {
-      return false;
+    // Older builds stored a bare 64-char SHA256 hex (lock screen) or legacy salted digest — both lack ":".
+    if (!savedHash.includes(':')) {
+      if (/^[a-f0-9]{64}$/i.test(savedHash)) {
+        const plainDigest = await this.digestSha256(normalizedPin);
+        const legacySaltDigest = await this.digestSha256(`${normalizedPin}::otp-pin-salt`);
+        const ok = plainDigest === savedHash || legacySaltDigest === savedHash;
+        if (ok) {
+          await this.savePin(normalizedPin);
+        }
+        return ok;
+      }
+
+      const legacySaltDigest = await this.digestSha256(`${normalizedPin}::otp-pin-salt`);
+      return legacySaltDigest === savedHash;
     }
 
-    const currentHash = await this.digestSha256(`${PIN_HASH_PREFIX}:${salt}:${pin.trim()}:${PIN_HASH_PEPPER}`);
-    return currentHash === expectedHash;
+    return false;
   }
 
   async savePin(pin: string): Promise<void> {
