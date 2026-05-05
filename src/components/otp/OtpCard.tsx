@@ -36,6 +36,8 @@ export function OtpCard({ entry, secret }: OtpCardProps) {
   const copiedOpacity = useSharedValue(0);
 
   const code = useMemo(() => {
+    // Recompute TOTP when the active time slot changes.
+    void currentSlot;
     if (!secret) {
       return '';
     }

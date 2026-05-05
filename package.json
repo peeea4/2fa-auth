@@ -9,10 +9,17 @@
     "ios": "expo run:ios",
     "ios:build": "expo run:ios",
     "web": "expo start --web",
+    "lint": "biome lint src index.ts App.tsx",
+    "lint:fix": "biome lint src index.ts App.tsx --write",
+    "format": "biome format src index.ts App.tsx --write",
+    "knip": "knip --config knip.json",
+    "check": "npm run lint && npm run knip",
     "test": "jest",
     "test:watch": "jest --watch"
   },
   "dependencies": {
+    "@react-navigation/bottom-tabs": "^7.15.11",
+    "@react-navigation/native": "^7.2.2",
     "expo": "~54.0.33",
     "expo-camera": "~17.0.10",
     "expo-clipboard": "~8.0.8",
@@ -26,6 +33,7 @@
     "expo-router": "~6.0.23",
     "expo-secure-store": "~15.0.8",
     "expo-status-bar": "~3.0.9",
+    "expo-updates": "^55.0.21",
     "i18next": "^26.0.8",
     "lucide-react-native": "^1.14.0",
     "nativewind": "^4.2.3",
@@ -46,11 +54,13 @@
     "zustand": "^5.0.12"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.4.14",
     "@types/jest": "29.5.14",
     "@types/react": "~19.1.0",
     "babel-preset-expo": "~54.0.10",
     "jest": "~29.7.0",
     "jest-expo": "~54.0.17",
+    "knip": "^6.11.0",
     "tailwindcss": "^3.4.17",
     "typescript": "~5.9.2"
   },
