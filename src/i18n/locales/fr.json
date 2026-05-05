@@ -7,14 +7,14 @@
     "slide1Subtitle": "Les secrets sont dans le trousseau iOS, pas dans le cloud.",
     "slide2Title": "Ajoutez des comptes en quelques secondes",
     "slide2Subtitle": "Scannez un QR depuis le service ou saisissez la clé manuellement.",
-    "slide3Title": "Appuyez pour copier",
-    "slide3Subtitle": "Un appui copie le code. Les haptics confirment le presse-papiers.",
+    "slide3Title": "Copier en un geste",
+    "slide3Subtitle": "Appuyez sur la carte pour copier le code. Les haptics et une courte confirmation confirment le presse-papiers.",
     "slide4Title": "Premium quand vous en avez besoin",
     "slide4Subtitle": "Débloquez le scan QR, la biométrie et des limites plus hautes — restez gratuit sinon."
   },
   "otpCard": {
     "copyLabel": "Copier le code à usage unique",
-    "copyHint": "Copie le code actuel dans le presse-papiers"
+    "copyHint": "Appuyez sur la carte pour copier le code actuel dans le presse-papiers"
   },
   "lock": {
     "title": "Application verrouillée",
@@ -80,6 +80,8 @@
   "unknownId": "inconnu",
   "cancel": "Annuler",
   "edit": "Modifier",
+  "swipeEdit": "Modifier",
+  "swipeDelete": "Supprimer",
   "delete": "Supprimer",
   "deleteConfirmTitle": "Supprimer ce compte ?",
   "deleteConfirmMessage": "Il faudra la clé d’origine pour l’ajouter à nouveau.",
@@ -88,6 +90,9 @@
   "fieldSecretOptionalHint": "Laissez vide pour conserver la clé secrète actuelle.",
   "errorEntryNotFound": "Ce compte est introuvable. Il a peut-être été supprimé.",
   "addSheetTitle": "Ajouter un compte",
+  "addAccountSheetIntro": "Choisissez comment ajouter un compte à deux facteurs.",
+  "addAccountSheetQrDesc": "Scannez le QR d’activation (Google, GitHub, 1Password, etc.).",
+  "addAccountSheetManualDesc": "Saisissez ou collez la clé secrète si vous n’avez pas de QR.",
   "scanQrPremiumHint": "Premium — débloquez le scan QR",
   "addCodeLimitHint": "Limite gratuite atteinte — passez en Premium pour en ajouter",
   "lockedCardHint": "Passez en Premium pour afficher les codes au-delà de la limite gratuite",
@@ -104,7 +109,7 @@
   "fieldDigits": "Chiffres",
   "fieldPeriod": "Période",
   "periodSeconds": "{{value}} s",
-  "manualSave": "Enregistrer le compte",
+  "manualSave": "Ajouter le compte",
   "errorAccountRequired": "Le compte est obligatoire",
   "errorSecretRequired": "La clé secrète est obligatoire",
   "errorSecretInvalid": "Clé invalide ou paramètres non pris en charge",

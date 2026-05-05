@@ -7,14 +7,14 @@
     "slide1Subtitle": "Los secretos viven en el Llavero de iOS, no en la nube.",
     "slide2Title": "Añade cuentas en segundos",
     "slide2Subtitle": "Escanea un QR del servicio o introduce la clave manualmente.",
-    "slide3Title": "Toca para copiar",
-    "slide3Subtitle": "Un toque copia el código. La respuesta háptica confirma el portapapeles.",
+    "slide3Title": "Copiar con un toque",
+    "slide3Subtitle": "Toca la tarjeta para copiar el código. La vibración y un aviso breve confirman el portapapeles.",
     "slide4Title": "Premium cuando lo necesites",
     "slide4Subtitle": "Desbloquea escaneo QR, biometría y más límites — sigue en el plan gratuito hasta entonces."
   },
   "otpCard": {
     "copyLabel": "Copiar código de un solo uso",
-    "copyHint": "Copia el código actual al portapapeles"
+    "copyHint": "Toca la tarjeta para copiar el código actual al portapapeles"
   },
   "lock": {
     "title": "App bloqueada",
@@ -80,6 +80,8 @@
   "unknownId": "desconocido",
   "cancel": "Cancelar",
   "edit": "Editar",
+  "swipeEdit": "Editar",
+  "swipeDelete": "Eliminar",
   "delete": "Eliminar",
   "deleteConfirmTitle": "¿Eliminar esta cuenta?",
   "deleteConfirmMessage": "Necesitarás la clave original para volver a añadirla.",
@@ -88,6 +90,9 @@
   "fieldSecretOptionalHint": "Déjalo en blanco para conservar la clave secreta actual.",
   "errorEntryNotFound": "No se encontró esta cuenta. Puede que ya se haya eliminado.",
   "addSheetTitle": "Añadir cuenta",
+  "addAccountSheetIntro": "Elige cómo quieres añadir la cuenta con doble factor.",
+  "addAccountSheetQrDesc": "Escanea el QR de configuración de Google, GitHub, 1Password, etc.",
+  "addAccountSheetManualDesc": "Escribe o pega la clave secreta si no tienes un código QR.",
   "scanQrPremiumHint": "Premium — desbloquea el escaneo QR",
   "addCodeLimitHint": "Límite gratuito — actualiza para añadir más",
   "lockedCardHint": "Pásate a Premium para ver códigos más allá del límite gratuito",
@@ -104,7 +109,7 @@
   "fieldDigits": "Dígitos",
   "fieldPeriod": "Período",
   "periodSeconds": "{{value}} s",
-  "manualSave": "Guardar cuenta",
+  "manualSave": "Añadir cuenta",
   "errorAccountRequired": "La cuenta es obligatoria",
   "errorSecretRequired": "La clave secreta es obligatoria",
   "errorSecretInvalid": "Clave no válida o parámetros no admitidos",

@@ -11,7 +11,7 @@ import {
   Text,
   View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
@@ -45,11 +45,12 @@ type FieldErrors = {
 export default function ManualEntryScreen() {
   const { t } = useTranslation();
   const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
   const upsertEntry = useOtpStore((state) => state.upsertEntry);
 
   const [issuer, setIssuer] = useState('');
   const [account, setAccount] = useState('');
-  const [secret, setSecret] = useState('MAZDIMJYG5ZGM3LPGEZWI2LSOF3WU23MHNSQ====');
+  const [secret, setSecret] = useState('');
   const [algorithm, setAlgorithm] = useState<OtpAlgorithm>('SHA1');
   const [digits, setDigits] = useState<OtpDigits>(6);
   const [period, setPeriod] = useState<OtpPeriod>(30);
@@ -117,7 +118,12 @@ export default function ManualEntryScreen() {
           <View style={styles.toolbarSpacer} />
         </View>
 
-        <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+        <ScrollView
+          contentContainerStyle={styles.scroll}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+          style={styles.scrollView}
+        >
           <Input
             autoCapitalize="words"
             error={fieldErrors.account}
@@ -219,12 +225,29 @@ export default function ManualEntryScreen() {
             })}
           </View>
 
-          {saveError ? <Text style={[styles.saveError, { color: colors.danger }]}>{saveError}</Text> : null}
-
-          <View style={styles.footer}>
-            <Button disabled={isSaving} onPress={handleSave} title={t('manualSave')} />
-          </View>
         </ScrollView>
+
+        <View
+          style={[
+            styles.submitBar,
+            {
+              borderTopColor: colors.border,
+              backgroundColor: colors.surface,
+              paddingBottom: Math.max(insets.bottom, 16),
+              ...(Platform.OS === 'ios'
+                ? {
+                    shadowColor: '#000000',
+                    shadowOffset: { width: 0, height: -3 },
+                    shadowOpacity: 0.08,
+                    shadowRadius: 10,
+                  }
+                : { elevation: 10 }),
+            },
+          ]}
+        >
+          {saveError ? <Text style={[styles.saveError, { color: colors.danger }]}>{saveError}</Text> : null}
+          <Button disabled={isSaving} onPress={handleSave} size="lg" title={t('manualSave')} />
+        </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -242,7 +265,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 8,
-    paddingVertical: 10,
+    paddingTop: 14,
+    paddingBottom: 12,
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
   toolbarBtn: {
@@ -257,10 +281,13 @@ const styles = StyleSheet.create({
   toolbarSpacer: {
     width: 64,
   },
+  scrollView: {
+    flex: 1,
+  },
   scroll: {
     padding: 20,
     gap: 16,
-    paddingBottom: 40,
+    paddingBottom: 24,
   },
   groupLabel: {
     fontSize: 15,
@@ -285,8 +312,12 @@ const styles = StyleSheet.create({
   saveError: {
     fontSize: 15,
     fontWeight: '500',
+    marginBottom: 10,
   },
-  footer: {
-    marginTop: 8,
+  submitBar: {
+    paddingHorizontal: 20,
+    paddingTop: 14,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    gap: 0,
   },
 });

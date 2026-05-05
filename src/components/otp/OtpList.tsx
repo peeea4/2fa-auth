@@ -1,18 +1,22 @@
-import { Lock } from 'lucide-react-native';
+import { Lock, Pencil, Trash2 } from 'lucide-react-native';
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FlatList, Pressable, StyleSheet, Text, View, type ListRenderItem } from 'react-native';
+import { Swipeable } from 'react-native-gesture-handler';
 
 import { useTheme } from '../../hooks/useTheme';
 import type { OtpEntry } from '../../types';
 import { isOtpListCardLocked } from '../../utils/premium-gating';
 import { OtpCard } from './OtpCard';
 
+const SWIPE_ACTION_WIDTH = 72;
+
 type OtpListProps = {
   entries: OtpEntry[];
   secretsById: Record<string, string | null | undefined>;
   isPremium: boolean;
-  onLongPressEntry: (entry: OtpEntry) => void;
+  onEditEntry: (entry: OtpEntry) => void;
+  onDeleteEntry: (entry: OtpEntry) => void;
   onLockedCardPress: () => void;
   /** Space for tab bar + FAB (default only suits FAB). */
   listBottomInset?: number;
@@ -22,36 +26,56 @@ export function OtpList({
   entries,
   secretsById,
   isPremium,
-  onLongPressEntry,
+  onEditEntry,
+  onDeleteEntry,
   onLockedCardPress,
   listBottomInset = 100,
 }: OtpListProps) {
   const { t } = useTranslation();
   const { colors } = useTheme();
 
+  const renderRightActions = useCallback(
+    (item: OtpEntry) => (_progress: unknown, _drag: unknown, swipeable: Swipeable) => (
+      <View style={styles.swipeActions}>
+        <Pressable
+          accessibilityLabel={t('swipeEdit')}
+          accessibilityRole="button"
+          onPress={() => {
+            swipeable.close();
+            onEditEntry(item);
+          }}
+          style={[styles.swipeBtn, { backgroundColor: colors.primary }]}
+        >
+          <Pencil color="#ffffff" size={22} strokeWidth={2} />
+        </Pressable>
+        <Pressable
+          accessibilityLabel={t('swipeDelete')}
+          accessibilityRole="button"
+          onPress={() => {
+            swipeable.close();
+            onDeleteEntry(item);
+          }}
+          style={[styles.swipeBtn, { backgroundColor: colors.danger }]}
+        >
+          <Trash2 color="#ffffff" size={22} strokeWidth={2} />
+        </Pressable>
+      </View>
+    ),
+    [colors, onDeleteEntry, onEditEntry, t],
+  );
+
   const renderItem: ListRenderItem<OtpEntry> = useCallback(
     ({ item, index }) => {
       const isLocked = isOtpListCardLocked(isPremium, index);
       const secret = isLocked ? null : (secretsById[item.id] ?? null);
 
-      return (
-        <Pressable
-          accessibilityRole="button"
-          delayLongPress={380}
-          onLongPress={() => {
-            onLongPressEntry(item);
-          }}
-          style={styles.cardWrap}
-        >
-          <OtpCard entry={item} secret={secret} />
-          {isLocked ? (
+      if (isLocked) {
+        return (
+          <View style={styles.cardWrap}>
+            <OtpCard entry={item} secret={secret} />
             <Pressable
               accessibilityHint={t('lockedCardHint')}
               accessibilityRole="button"
-              delayLongPress={380}
-              onLongPress={() => {
-                onLongPressEntry(item);
-              }}
               onPress={onLockedCardPress}
               style={[styles.lockOverlay, { backgroundColor: `${colors.background}CC` }]}
             >
@@ -60,11 +84,25 @@ export function OtpList({
                 <Text style={[styles.lockLabel, { color: colors.text }]}>{t('premium')}</Text>
               </View>
             </Pressable>
-          ) : null}
-        </Pressable>
+          </View>
+        );
+      }
+
+      return (
+        <Swipeable
+          containerStyle={styles.cardWrap}
+          friction={2}
+          overshootRight={false}
+          overshootFriction={8}
+          renderRightActions={renderRightActions(item)}
+        >
+          <View style={styles.cardInner}>
+            <OtpCard entry={item} secret={secret} />
+          </View>
+        </Swipeable>
       );
     },
-    [colors, isPremium, onLockedCardPress, onLongPressEntry, secretsById, t],
+    [colors, isPremium, onLockedCardPress, renderRightActions, secretsById, t],
   );
 
   return (
@@ -89,8 +127,21 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     overflow: 'hidden',
   },
+  cardInner: {
+    borderRadius: 16,
+    overflow: 'hidden',
+  },
   separator: {
     height: 12,
+  },
+  swipeActions: {
+    flexDirection: 'row',
+    height: '100%',
+  },
+  swipeBtn: {
+    width: SWIPE_ACTION_WIDTH,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   lockOverlay: {
     ...StyleSheet.absoluteFillObject,

@@ -7,14 +7,14 @@
     "slide1Subtitle": "Secrets live in the iOS Keychain — not in the cloud.",
     "slide2Title": "Add accounts in seconds",
     "slide2Subtitle": "Scan a QR code from the service or enter the setup key manually.",
-    "slide3Title": "Tap to copy",
-    "slide3Subtitle": "One tap copies the code. Haptics confirm it landed on the clipboard.",
+    "slide3Title": "Copy in one tap",
+    "slide3Subtitle": "Tap the card to copy the code. Haptics and a short confirmation tell you it’s on the clipboard.",
     "slide4Title": "Premium when you need more",
     "slide4Subtitle": "Unlock QR scanning, biometrics, and higher limits — stay on free tier until then."
   },
   "otpCard": {
     "copyLabel": "Copy one-time code",
-    "copyHint": "Copies the current code to the clipboard"
+    "copyHint": "Tap the card to copy the current code to the clipboard"
   },
   "lock": {
     "title": "App locked",
@@ -80,6 +80,8 @@
   "unknownId": "unknown",
   "cancel": "Cancel",
   "edit": "Edit",
+  "swipeEdit": "Edit",
+  "swipeDelete": "Delete",
   "delete": "Delete",
   "deleteConfirmTitle": "Delete this account?",
   "deleteConfirmMessage": "You will need the original setup key to add it again.",
@@ -88,6 +90,9 @@
   "fieldSecretOptionalHint": "Leave blank to keep your current secret key.",
   "errorEntryNotFound": "This account could not be found. It may have been removed.",
   "addSheetTitle": "Add account",
+  "addAccountSheetIntro": "Pick how you want to add a two-factor account.",
+  "addAccountSheetQrDesc": "Scan the setup QR from Google, GitHub, 1Password, etc.",
+  "addAccountSheetManualDesc": "Type or paste the secret key if you don’t have a QR code.",
   "scanQrPremiumHint": "Premium — unlock QR scanning",
   "addCodeLimitHint": "Free limit reached — upgrade to add more",
   "lockedCardHint": "Upgrade to Premium to reveal codes beyond the free limit",
@@ -104,7 +109,7 @@
   "fieldDigits": "Digits",
   "fieldPeriod": "Period",
   "periodSeconds": "{{value}} s",
-  "manualSave": "Save account",
+  "manualSave": "Add account",
   "errorAccountRequired": "Account is required",
   "errorSecretRequired": "Secret key is required",
   "errorSecretInvalid": "Invalid secret or unsupported parameters",
