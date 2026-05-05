@@ -2,5 +2,12 @@
   "$schema": "https://unpkg.com/knip@latest/schema.json",
   "entry": ["src/app/**/*.{ts,tsx}"],
   "project": ["src/**/*.{ts,tsx}"],
-  "ignoreDependencies": ["babel-preset-expo"]
+  "ignoreDependencies": ["babel-preset-expo"],
+  "ignore": [
+    "src/hooks/index.ts",
+    "src/hooks/useBiometrics.ts",
+    "src/services/crypto.service.ts",
+    "src/types/premium.types.ts"
+  ],
+  "ignoreExportsUsedInFile": true
 }
