@@ -13,8 +13,10 @@
     "lint:fix": "biome lint src index.ts App.tsx --write",
     "format": "biome format src index.ts App.tsx --write",
     "knip": "knip --config knip.json",
+    "knip:ci": "knip --config knip.json --no-exit-code",
     "check": "npm run lint && npm run knip",
     "test": "jest",
+    "test:ci": "jest --ci --runInBand",
     "test:watch": "jest --watch"
   },
   "dependencies": {
