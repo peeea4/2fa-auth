@@ -1,12 +1,8 @@
-import * as SecureStore from 'expo-secure-store';
-import { createMMKV } from 'react-native-mmkv';
+import * as SecureStore from "expo-secure-store";
 
-import { config } from '../constants';
-import type { OtpEntry } from '../types';
-
-const mmkv = createMMKV({
-  id: `${config.appName}.storage`,
-});
+import { config } from "../constants";
+import type { OtpEntry } from "../types";
+import { getEncryptedMmkv, getMmkvMetadataStoreId } from "./mmkv-secure.factory";
 
 const secureStoreOptions: SecureStore.SecureStoreOptions = {
   keychainService: config.appName,
@@ -32,16 +28,18 @@ const parseOtpEntries = (rawValue: string | undefined): OtpEntry[] => {
 };
 
 class StorageService {
-  getOtpEntries(): OtpEntry[] {
+  async getOtpEntries(): Promise<OtpEntry[]> {
+    const mmkv = await getEncryptedMmkv(getMmkvMetadataStoreId());
     return parseOtpEntries(mmkv.getString(config.otpMetadataStorageKey));
   }
 
-  saveOtpEntries(entries: OtpEntry[]): void {
+  async saveOtpEntries(entries: OtpEntry[]): Promise<void> {
+    const mmkv = await getEncryptedMmkv(getMmkvMetadataStoreId());
     mmkv.set(config.otpMetadataStorageKey, JSON.stringify(entries));
   }
 
-  upsertOtpEntry(entry: OtpEntry): void {
-    const entries = this.getOtpEntries();
+  async upsertOtpEntry(entry: OtpEntry): Promise<void> {
+    const entries = await this.getOtpEntries();
     const entryIndex = entries.findIndex((item) => item.id === entry.id);
 
     if (entryIndex >= 0) {
@@ -50,15 +48,15 @@ class StorageService {
       entries.push(entry);
     }
 
-    this.saveOtpEntries(entries);
+    await this.saveOtpEntries(entries);
   }
 
-  removeOtpEntry(id: string): void {
-    const entries = this.getOtpEntries();
+  async removeOtpEntry(id: string): Promise<void> {
+    const entries = await this.getOtpEntries();
     const nextEntries = entries.filter((entry) => entry.id !== id);
 
     if (entries.length !== nextEntries.length) {
-      this.saveOtpEntries(nextEntries);
+      await this.saveOtpEntries(nextEntries);
     }
   }
 
@@ -84,13 +82,13 @@ class StorageService {
   }
 
   async clearOtpData(): Promise<void> {
-    const entries = this.getOtpEntries();
+    const entries = await this.getOtpEntries();
     const deletionPromises = entries.map((entry) => this.deleteOtpSecret(entry.id));
 
     await Promise.all(deletionPromises);
+    const mmkv = await getEncryptedMmkv(getMmkvMetadataStoreId());
     mmkv.remove(config.otpMetadataStorageKey);
   }
 }
 
 export const storageService = new StorageService();
-

@@ -1,5 +1,8 @@
 import * as Crypto from 'expo-crypto';
 
+/**
+ * Deprecated: слабая схема (XOR + SHA-256). Метаданные — MMKV AES-256 + ключ в Keychain.
+ */
 const CRYPTO_KDF_PEPPER = 'otp-pin-pepper';
 const ENCRYPTION_PREFIX = 'enc-v1';
 const BASE64_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
