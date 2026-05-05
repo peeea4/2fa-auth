@@ -30,9 +30,6 @@
     "disableProtectionConfirm": "Turn off",
     "disableProtectionCta": "Turn off protection and continue"
   },
-  "app": {
-    "welcome": "Open up App.tsx to start working on your app!"
-  },
   "title": "Authenticator",
   "search": "Search services",
   "add": "Add code",
