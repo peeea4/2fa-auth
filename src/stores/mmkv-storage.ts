@@ -1,16 +1,20 @@
-import { createMMKV } from 'react-native-mmkv';
-import type { StateStorage } from 'zustand/middleware';
+import type { StateStorage } from "zustand/middleware";
 
-const mmkv = createMMKV({
-  id: '2fa-auth-zustand-storage',
-});
+import { getEncryptedMmkv, MMKV_ZUSTAND_PERSIST_ID } from "../services/mmkv-secure.factory";
 
 export const mmkvStorage: StateStorage = {
-  getItem: (name) => mmkv.getString(name) ?? null,
+  getItem: async (name) => {
+    const mmkv = await getEncryptedMmkv(MMKV_ZUSTAND_PERSIST_ID);
+    return mmkv.getString(name) ?? null;
+  },
   setItem: (name, value) => {
-    mmkv.set(name, value);
+    void getEncryptedMmkv(MMKV_ZUSTAND_PERSIST_ID).then((mmkv) => {
+      mmkv.set(name, value);
+    });
   },
   removeItem: (name) => {
-    mmkv.remove(name);
+    void getEncryptedMmkv(MMKV_ZUSTAND_PERSIST_ID).then((mmkv) => {
+      mmkv.remove(name);
+    });
   },
 };
