@@ -1,17 +1,18 @@
-import '../../global.css';
+import "../../global.css";
 
-import { Stack } from 'expo-router';
-import { useEffect, useMemo, useRef } from 'react';
-import { AppState, Platform, StyleSheet } from 'react-native';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { Stack } from "expo-router";
+import { useEffect, useMemo, useRef } from "react";
+import { AppState, Platform, StyleSheet } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
-import { ThemeRoot } from '../components/theme';
-import i18n from '../i18n';
-import { usePremium } from '../hooks/usePremium';
-import { useTheme } from '../hooks/useTheme';
-import { storageService } from '../services/storage.service';
-import { useAuthStore, useSettingsStore } from '../stores';
+import { ThemeRoot } from "../components/theme";
+import { usePremium } from "../hooks/usePremium";
+import { useTheme } from "../hooks/useTheme";
+import i18n from "../i18n";
+import { migrateLegacyOtpMetadataIfNeeded } from "../services/migrate-legacy-otp-metadata";
+import { storageService } from "../services/storage.service";
+import { useAuthStore, useSettingsStore } from "../stores";
 
 export default function RootLayout() {
   const { colors } = useTheme();
@@ -27,16 +28,16 @@ export default function RootLayout() {
    */
   const addModalScreenOptions = useMemo(
     () =>
-      Platform.OS === 'ios'
+      Platform.OS === "ios"
         ? {
-            presentation: 'pageSheet' as const,
+            presentation: "pageSheet" as const,
             contentStyle: {
               flex: 1,
               backgroundColor: colors.background,
             },
           }
         : {
-            presentation: 'modal' as const,
+            presentation: "modal" as const,
             contentStyle: {
               flex: 1,
               backgroundColor: colors.background,
@@ -50,15 +51,19 @@ export default function RootLayout() {
   }, []);
 
   useEffect(() => {
+    void migrateLegacyOtpMetadataIfNeeded();
+  }, []);
+
+  useEffect(() => {
     void i18n.changeLanguage(language);
   }, [language]);
 
   useEffect(() => {
-    const subscription = AppState.addEventListener('change', (nextState) => {
+    const subscription = AppState.addEventListener("change", (nextState) => {
       const previousState = appStateRef.current;
       appStateRef.current = nextState;
 
-      if (previousState === 'active' && (nextState === 'inactive' || nextState === 'background')) {
+      if (previousState === "active" && (nextState === "inactive" || nextState === "background")) {
         if (canUseBiometric && isBiometricEnabled) {
           lock();
         }
@@ -80,8 +85,8 @@ export default function RootLayout() {
             <Stack.Screen name="lock" />
             <Stack.Screen name="(tabs)" />
             <Stack.Screen name="add" options={addModalScreenOptions} />
-            <Stack.Screen name="paywall" options={{ presentation: 'modal' }} />
-            <Stack.Screen name="edit/[id]" options={{ presentation: 'modal' }} />
+            <Stack.Screen name="paywall" options={{ presentation: "modal" }} />
+            <Stack.Screen name="edit/[id]" options={{ presentation: "modal" }} />
           </Stack>
         </ThemeRoot>
       </SafeAreaProvider>

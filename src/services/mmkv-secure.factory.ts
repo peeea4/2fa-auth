@@ -6,10 +6,6 @@ import { config } from "../constants";
 /** ID экземпляра MMKV для Zustand persist (не менять — миграция с незашифрованного файла). */
 export const MMKV_ZUSTAND_PERSIST_ID = "2fa-auth-zustand-storage";
 
-export function getMmkvMetadataStoreId(): string {
-  return `${config.appName}.storage`;
-}
-
 const secureStoreOptions: SecureStore.SecureStoreOptions = {
   keychainService: config.appName,
   keychainAccessible: SecureStore.AFTER_FIRST_UNLOCK_THIS_DEVICE_ONLY,
@@ -41,7 +37,7 @@ function base64ToBinaryKey(encoded: string): string {
   return bin;
 }
 
-const mmkvIds = (): [string, string] => [MMKV_ZUSTAND_PERSIST_ID, getMmkvMetadataStoreId()];
+const mmkvIds = (): string[] => [MMKV_ZUSTAND_PERSIST_ID];
 
 const mmkvById = new Map<string, MMKV>();
 let cachedBinaryKey: string | null = null;
