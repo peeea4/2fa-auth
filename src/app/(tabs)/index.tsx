@@ -1,33 +1,55 @@
-import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
-import { router } from 'expo-router';
-import { Plus } from 'lucide-react-native';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { Alert, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
+import * as Haptics from "expo-haptics";
+import { router } from "expo-router";
+import { Plus } from "lucide-react-native";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
+import {
+  Alert,
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 
-import { OtpList } from '../../components/otp';
-import { Button } from '../../components/ui/Button';
-import { EmptyState } from '../../components/ui/EmptyState';
-import { Sheet } from '../../components/ui/Sheet';
-import { usePremium } from '../../hooks/usePremium';
-import { useTheme } from '../../hooks/useTheme';
-import { storageService } from '../../services/storage.service';
-import { useOtpStore } from '../../stores';
-import type { OtpEntry } from '../../types';
+import { OtpList } from "../../components/otp";
+import { Button } from "../../components/ui/Button";
+import { EmptyState } from "../../components/ui/EmptyState";
+import { usePremium } from "../../hooks/usePremium";
+import { useTheme } from "../../hooks/useTheme";
+import { storageService } from "../../services/storage.service";
+import { useOtpStore } from "../../stores";
+import type { OtpEntry } from "../../types";
+
+/** Тень «парящего» FAB: лёгкое свечение primary + глубина. */
+function fabIosShadow(primary: string) {
+  return {
+    shadowColor: primary,
+    shadowOffset: { width: 0, height: 12 } as const,
+    shadowOpacity: 0.42,
+    shadowRadius: 22,
+  };
+}
 
 export default function HomeScreen() {
   const { t, i18n } = useTranslation();
   const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
   const tabBarHeight = useBottomTabBarHeight();
   const entries = useOtpStore((state) => state.entries);
   const removeEntry = useOtpStore((state) => state.removeEntry);
-  const { canAddCode, canScanQr, premium } = usePremium();
+  const { premium } = usePremium();
 
-  const [search, setSearch] = useState('');
-  const [addMenuOpen, setAddMenuOpen] = useState(false);
-  const [entryForActions, setEntryForActions] = useState<OtpEntry | null>(null);
-  const [secretsById, setSecretsById] = useState<Record<string, string | null>>({});
+  const [search, setSearch] = useState("");
+  const [secretsById, setSecretsById] = useState<Record<string, string | null>>(
+    {},
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -56,40 +78,24 @@ export default function HomeScreen() {
       return sorted;
     }
     return sorted.filter(
-      (e) => e.issuer.toLowerCase().includes(q) || e.account.toLowerCase().includes(q) || e.id.toLowerCase().includes(q),
+      (e) =>
+        e.issuer.toLowerCase().includes(q) ||
+        e.account.toLowerCase().includes(q) ||
+        e.id.toLowerCase().includes(q),
     );
   }, [entries, search]);
 
   const openPaywall = useCallback(() => {
-    setAddMenuOpen(false);
-    router.push('/paywall');
+    router.push("/paywall");
   }, []);
-
-  const handleScanQr = useCallback(() => {
-    setAddMenuOpen(false);
-    if (canScanQr) {
-      router.push('/add/scan');
-      return;
-    }
-    openPaywall();
-  }, [canScanQr, openPaywall]);
-
-  const handleManualEntry = useCallback(() => {
-    setAddMenuOpen(false);
-    if (canAddCode) {
-      router.push('/add/manual');
-      return;
-    }
-    openPaywall();
-  }, [canAddCode, openPaywall]);
 
   const confirmDeleteEntry = useCallback(
     (entry: OtpEntry) => {
-      Alert.alert(t('deleteConfirmTitle'), t('deleteConfirmMessage'), [
-        { text: t('cancel'), style: 'cancel' },
+      Alert.alert(t("deleteConfirmTitle"), t("deleteConfirmMessage"), [
+        { text: t("cancel"), style: "cancel" },
         {
-          text: t('delete'),
-          style: 'destructive',
+          text: t("delete"),
+          style: "destructive",
           onPress: async () => {
             await storageService.deleteOtpSecret(entry.id);
             removeEntry(entry.id);
@@ -100,129 +106,121 @@ export default function HomeScreen() {
     [removeEntry, t],
   );
 
-  const handleLongPressEntry = useCallback((entry: OtpEntry) => {
-    setEntryForActions(entry);
+  const handleEditEntry = useCallback((entry: OtpEntry) => {
+    router.push(`/edit/${entry.id}`);
   }, []);
 
   return (
-    <SafeAreaView edges={['top', 'left', 'right']} key={i18n.language} style={[styles.safe, { backgroundColor: colors.background }]}>
-      <View style={styles.header}>
-        <Text style={[styles.title, { color: colors.text }]}>{t('homeHeading')}</Text>
-        <TextInput
-          accessibilityLabel={t('search')}
-          autoCapitalize="none"
-          autoCorrect={false}
-          clearButtonMode="while-editing"
-          onChangeText={setSearch}
-          placeholder={t('search')}
-          placeholderTextColor={colors.textMuted}
-          style={[
-            styles.search,
-            {
-              color: colors.text,
-              borderColor: colors.border,
-              backgroundColor: colors.surface,
-            },
-          ]}
-          value={search}
-        />
-      </View>
+    <SafeAreaView
+      edges={["top", "left", "right"]}
+      key={i18n.language}
+      style={[styles.safe, { backgroundColor: colors.background }]}
+    >
+      <View style={styles.contentRoot}>
+        <View style={styles.header}>
+          <Text style={[styles.title, { color: colors.text }]}>
+            {t("homeHeading")}
+          </Text>
+          <TextInput
+            accessibilityLabel={t("search")}
+            autoCapitalize="none"
+            autoCorrect={false}
+            clearButtonMode="while-editing"
+            onChangeText={setSearch}
+            placeholder={t("search")}
+            placeholderTextColor={colors.textMuted}
+            style={[
+              styles.search,
+              {
+                color: colors.text,
+                borderColor: colors.border,
+                backgroundColor: colors.surface,
+              },
+            ]}
+            value={search}
+          />
+        </View>
 
-      <View style={styles.body}>
-        {sortedFiltered.length === 0 ? (
-          <EmptyState
-            action={<Button onPress={() => setAddMenuOpen(true)} title={t('add')} />}
-            description={entries.length === 0 ? t('emptySubtitle') : t('emptySearchSubtitle')}
-            title={entries.length === 0 ? t('emptyTitle') : t('emptySearchTitle')}
-          />
-        ) : (
-          <OtpList
-            entries={sortedFiltered}
-            isPremium={premium.isPremium}
-            listBottomInset={tabBarHeight + 88}
-            onLockedCardPress={openPaywall}
-            onLongPressEntry={handleLongPressEntry}
-            secretsById={secretsById}
-          />
+        <View style={styles.body}>
+          {sortedFiltered.length === 0 ? (
+            <EmptyState
+              action={
+                <Button
+                  leftIcon={
+                    <Plus color="#ffffff" size={20} strokeWidth={2.5} />
+                  }
+                  onPress={() => router.push("/add")}
+                  size="lg"
+                  title={t("add")}
+                />
+              }
+              description={
+                entries.length === 0
+                  ? t("emptySubtitle")
+                  : t("emptySearchSubtitle")
+              }
+              title={
+                entries.length === 0 ? t("emptyTitle") : t("emptySearchTitle")
+              }
+            />
+          ) : (
+            <OtpList
+              entries={sortedFiltered}
+              isPremium={premium.isPremium}
+              listBottomInset={tabBarHeight + 100}
+              onDeleteEntry={confirmDeleteEntry}
+              onEditEntry={handleEditEntry}
+              onLockedCardPress={openPaywall}
+              secretsById={secretsById}
+            />
+          )}
+        </View>
+
+        {!!sortedFiltered.length && (
+          <View
+            collapsable={false}
+            style={[
+              styles.fabShell,
+              {
+                position: "absolute",
+                bottom: 18 + insets.bottom,
+                right: 16 + insets.right,
+                zIndex: 20,
+                backgroundColor: colors.primary,
+                borderWidth: 1,
+                borderColor: "rgba(255,255,255,0.32)",
+                ...(Platform.OS === "ios" ? fabIosShadow(colors.primary) : {}),
+              },
+            ]}
+          >
+            <Pressable
+              accessibilityLabel={t("add")}
+              accessibilityRole="button"
+              onPress={() => router.push("/add")}
+              onPressIn={() => {
+                void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              }}
+              style={({ pressed }) => [
+                pressed && {
+                  opacity: 0.92,
+                  transform: [{ scale: 0.94 }, { translateY: 1 }],
+                },
+              ]}
+            >
+              <Plus color="#ffffff" size={44} />
+            </Pressable>
+          </View>
         )}
       </View>
-
-      <Pressable
-        accessibilityLabel={t('add')}
-        accessibilityRole="button"
-        onPress={() => setAddMenuOpen(true)}
-        style={({ pressed }) => [
-          styles.fab,
-          {
-            backgroundColor: colors.primary,
-            opacity: pressed ? 0.9 : 1,
-            bottom: tabBarHeight + 16,
-          },
-        ]}
-      >
-        <Plus color="#ffffff" size={28} strokeWidth={2.5} />
-      </Pressable>
-
-      <Sheet onClose={() => setEntryForActions(null)} visible={entryForActions !== null}>
-        <Text numberOfLines={2} style={[styles.sheetTitle, { color: colors.text }]}>
-          {entryForActions ? entryForActions.issuer || entryForActions.account : ''}
-        </Text>
-        <Text style={[styles.sheetSubtitle, { color: colors.textMuted }]}>
-          {entryForActions?.account && entryForActions.issuer ? entryForActions.account : null}
-        </Text>
-        <View style={styles.sheetRows}>
-          <Pressable
-            onPress={() => {
-              const target = entryForActions;
-              setEntryForActions(null);
-              if (target) {
-                router.push(`/edit/${target.id}`);
-              }
-            }}
-            style={({ pressed }) => [styles.sheetRow, { opacity: pressed ? 0.75 : 1, borderColor: colors.border }]}
-          >
-            <Text style={[styles.sheetRowTitle, { color: colors.text }]}>{t('edit')}</Text>
-          </Pressable>
-          <Pressable
-            onPress={() => {
-              const target = entryForActions;
-              setEntryForActions(null);
-              if (target) {
-                confirmDeleteEntry(target);
-              }
-            }}
-            style={({ pressed }) => [styles.sheetRow, { opacity: pressed ? 0.75 : 1, borderColor: colors.danger }]}
-          >
-            <Text style={[styles.sheetRowTitle, { color: colors.danger }]}>{t('delete')}</Text>
-          </Pressable>
-        </View>
-      </Sheet>
-
-      <Sheet onClose={() => setAddMenuOpen(false)} visible={addMenuOpen}>
-        <Text style={[styles.sheetTitle, { color: colors.text }]}>{t('addSheetTitle')}</Text>
-        <View style={styles.sheetRows}>
-          <Pressable
-            onPress={handleScanQr}
-            style={({ pressed }) => [styles.sheetRow, { opacity: pressed ? 0.75 : 1, borderColor: colors.border }]}
-          >
-            <Text style={[styles.sheetRowTitle, { color: colors.text }]}>{t('scanQr')}</Text>
-            {!canScanQr ? <Text style={[styles.sheetRowHint, { color: colors.textMuted }]}>{t('scanQrPremiumHint')}</Text> : null}
-          </Pressable>
-          <Pressable
-            onPress={handleManualEntry}
-            style={({ pressed }) => [styles.sheetRow, { opacity: pressed ? 0.75 : 1, borderColor: colors.border }]}
-          >
-            <Text style={[styles.sheetRowTitle, { color: colors.text }]}>{t('manualEntry')}</Text>
-            {!canAddCode ? <Text style={[styles.sheetRowHint, { color: colors.textMuted }]}>{t('addCodeLimitHint')}</Text> : null}
-          </Pressable>
-        </View>
-      </Sheet>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   safe: {
+    flex: 1,
+  },
+  contentRoot: {
     flex: 1,
   },
   header: {
@@ -232,7 +230,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 28,
-    fontWeight: '700',
+    fontWeight: "700",
   },
   search: {
     minHeight: 44,
@@ -245,45 +243,17 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 20,
   },
-  fab: {
-    position: 'absolute',
-    right: 22,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.22,
-    shadowRadius: 6,
-    elevation: 6,
+  fabShell: {
+    borderRadius: 32,
+    overflow: "visible",
+    padding: 6,
   },
-  sheetTitle: {
-    fontSize: 17,
-    fontWeight: '700',
-    marginBottom: 4,
+  fabHit: {
+    alignItems: "center",
+    justifyContent: "center",
   },
-  sheetSubtitle: {
-    fontSize: 14,
-    marginTop: -4,
-    marginBottom: 4,
-  },
-  sheetRows: {
-    gap: 10,
-  },
-  sheetRow: {
-    borderWidth: 1,
-    borderRadius: 12,
-    paddingVertical: 14,
-    paddingHorizontal: 14,
-    gap: 4,
-  },
-  sheetRowTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  sheetRowHint: {
-    fontSize: 13,
+  fabIconCenter: {
+    alignItems: "center",
+    justifyContent: "center",
   },
 });

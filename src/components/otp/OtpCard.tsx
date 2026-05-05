@@ -1,7 +1,7 @@
 import * as Haptics from 'expo-haptics';
 import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Platform, Pressable, StyleSheet, Text, ToastAndroid, View } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -78,8 +78,12 @@ export function OtpCard({ entry, secret }: OtpCardProps) {
     }
 
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-    showCopiedFeedback();
-  }, [code, secret, showCopiedFeedback]);
+    if (Platform.OS === 'android') {
+      ToastAndroid.show(t('copied'), ToastAndroid.SHORT);
+    } else {
+      showCopiedFeedback();
+    }
+  }, [code, secret, showCopiedFeedback, t]);
 
   return (
     <View
@@ -91,49 +95,59 @@ export function OtpCard({ entry, secret }: OtpCardProps) {
         },
       ]}
     >
-      <View style={[styles.accent, { backgroundColor: accent }]} />
+      <Pressable
+        accessibilityHint={t('otpCard.copyHint')}
+        accessibilityLabel={t('otpCard.copyLabel')}
+        accessibilityRole="button"
+        disabled={!secret}
+        onPress={handleCopy}
+        style={({ pressed }) => [
+          styles.cardPressable,
+          {
+            opacity: !secret ? 0.92 : pressed ? 0.94 : 1,
+          },
+        ]}
+      >
+        <View style={[styles.accent, { backgroundColor: accent }]} />
 
-      <View style={styles.body}>
-        <View style={styles.header}>
-          <Text numberOfLines={1} style={[styles.issuer, { color: colors.text }]}>
-            {entry.issuer || t('title')}
-          </Text>
-          <Text numberOfLines={1} style={[styles.account, { color: colors.textMuted }]}>
-            {entry.account}
-          </Text>
-        </View>
-
-        <Pressable
-          accessibilityHint={t('otpCard.copyHint')}
-          accessibilityLabel={t('otpCard.copyLabel')}
-          accessibilityRole="button"
-          disabled={!secret}
-          onPress={handleCopy}
-          style={({ pressed }) => [
-            styles.codeWrap,
-            { opacity: !secret ? 0.55 : pressed ? 0.85 : 1 },
-          ]}
-        >
-          <Text
-            selectable={false}
-            style={[
-              styles.code,
-              {
-                color: colors.text,
-              },
-            ]}
-          >
-            {displayCode}
-          </Text>
-          <Animated.View pointerEvents="none" style={[styles.copiedBadge, { backgroundColor: colors.primary }, copiedBadgeStyle]}>
-            <Text style={styles.copiedText}>
-              {t('copied')}!
+        <View style={styles.body}>
+          <View style={styles.header}>
+            <Text numberOfLines={1} style={[styles.issuer, { color: colors.text }]}>
+              {entry.issuer || t('title')}
             </Text>
-          </Animated.View>
-        </Pressable>
+            <Text numberOfLines={1} style={[styles.account, { color: colors.textMuted }]}>
+              {entry.account}
+            </Text>
+          </View>
 
-        <CountdownBar fillColor={accent} period={entry.period} timeLeft={timeLeft} trackColor={colors.border} />
-      </View>
+          <View style={styles.codeBlock}>
+            <Text
+              selectable={false}
+              style={[
+                styles.code,
+                {
+                  color: colors.text,
+                  opacity: !secret ? 0.55 : 1,
+                },
+              ]}
+            >
+              {displayCode}
+            </Text>
+            {Platform.OS !== 'android' ? (
+              <Animated.View
+                pointerEvents="none"
+                style={[styles.copiedBadge, { backgroundColor: colors.primary }, copiedBadgeStyle]}
+              >
+                <Text style={styles.copiedText}>
+                  {t('copied')}!
+                </Text>
+              </Animated.View>
+            ) : null}
+          </View>
+
+          <CountdownBar fillColor={accent} period={entry.period} timeLeft={timeLeft} trackColor={colors.border} />
+        </View>
+      </Pressable>
     </View>
   );
 }
@@ -147,8 +161,12 @@ const styles = StyleSheet.create({
   card: {
     borderRadius: 16,
     borderWidth: 1,
-    flexDirection: 'row',
     overflow: 'hidden',
+  },
+  cardPressable: {
+    flexDirection: 'row',
+    flex: 1,
+    alignSelf: 'stretch',
   },
   accent: {
     width: 4,
@@ -169,7 +187,8 @@ const styles = StyleSheet.create({
   account: {
     fontSize: 14,
   },
-  codeWrap: {
+  codeBlock: {
+    position: 'relative',
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 4,

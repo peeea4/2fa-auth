@@ -17,15 +17,16 @@ type ButtonProps = {
   fullWidth?: boolean;
 };
 
-const sizeStyles: Record<ButtonSize, { minHeight: number; horizontal: number; fontSize: number }> = {
+/** minHeight — внешняя высота; padding внутри неё (Yoga), поэтому minHeight ≥ 2·paddingV + зона под строку. */
+const sizeStyles: Record<ButtonSize, { minHeight: number; paddingVertical: number; fontSize: number }> = {
   md: {
-    minHeight: 44,
-    horizontal: 16,
+    minHeight: 54,
+    paddingVertical: 8,
     fontSize: 16,
   },
   lg: {
-    minHeight: 50,
-    horizontal: 20,
+    minHeight: 78,
+    paddingVertical: 12,
     fontSize: 17,
   },
 };
@@ -61,39 +62,48 @@ export function Button({
     ghost: colors.text,
   };
 
+  const bg = backgroundColorByVariant[variant];
+  const border = borderColorByVariant[variant];
+
   return (
-    <Pressable
-      accessibilityRole="button"
-      disabled={disabled}
-      onPress={onPress}
-      style={({ pressed }) => [
-        styles.base,
+    <View
+      style={[
         {
-          minHeight: currentSize.minHeight,
-          paddingHorizontal: currentSize.horizontal,
-          backgroundColor: backgroundColorByVariant[variant],
-          borderColor: borderColorByVariant[variant],
-          opacity: disabled ? 0.5 : pressed ? 0.85 : 1,
+          borderRadius: 12,
+          borderWidth: variant === 'ghost' ? 0 : 1,
+          borderColor: border,
+          backgroundColor: bg,
+          opacity: disabled ? 0.5 : 1,
           width: fullWidth ? '100%' : undefined,
+          overflow: 'hidden',
+          alignSelf: fullWidth ? 'stretch' : 'flex-start',
+          paddingHorizontal: currentSize.paddingHorizontal,
+          paddingVertical: currentSize.paddingVertical,
         },
       ]}
     >
-      <View style={styles.content}>
-        {leftIcon ? <View style={styles.icon}>{leftIcon}</View> : null}
-        <Text style={[styles.label, { color: textColorByVariant[variant], fontSize: currentSize.fontSize }]}>{title}</Text>
-        {rightIcon ? <View style={styles.icon}>{rightIcon}</View> : null}
-      </View>
-    </Pressable>
+      <Pressable
+        accessibilityRole="button"
+        disabled={disabled}
+        onPress={onPress}
+        style={({ pressed }) => ({
+          minHeight: currentSize.minHeight,
+          alignItems: 'center',
+          justifyContent: 'center',
+          opacity: pressed && !disabled ? 0.9 : 1,
+        })}
+      >
+        <View style={styles.content}>
+          {leftIcon ? <View style={styles.icon}>{leftIcon}</View> : null}
+          <Text style={[styles.label, { color: textColorByVariant[variant], fontSize: currentSize.fontSize }]}>{title}</Text>
+          {rightIcon ? <View style={styles.icon}>{rightIcon}</View> : null}
+        </View>
+      </Pressable>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  base: {
-    borderRadius: 12,
-    borderWidth: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   content: {
     flexDirection: 'row',
     alignItems: 'center',

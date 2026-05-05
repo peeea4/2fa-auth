@@ -10,7 +10,7 @@ import {
   Text,
   View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
@@ -36,6 +36,7 @@ type FieldErrors = {
 export default function EditOtpScreen() {
   const { t } = useTranslation();
   const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
   const { id: rawId } = useLocalSearchParams<{ id: string | string[] }>();
   const id = useMemo(() => (Array.isArray(rawId) ? rawId[0] : rawId) ?? '', [rawId]);
 
@@ -147,7 +148,12 @@ export default function EditOtpScreen() {
           <View style={styles.toolbarSpacer} />
         </View>
 
-        <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+        <ScrollView
+          contentContainerStyle={styles.scroll}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+          style={styles.scrollView}
+        >
           <Input
             autoCapitalize="words"
             error={fieldErrors.account}
@@ -161,7 +167,6 @@ export default function EditOtpScreen() {
           />
 
           <Input
-            autoCapitalize="words"
             label={t('fieldIssuer')}
             onChangeText={setIssuer}
             placeholder={t('fieldIssuerPlaceholder')}
@@ -249,13 +254,29 @@ export default function EditOtpScreen() {
               );
             })}
           </View>
-
-          {saveError ? <Text style={[styles.saveError, { color: colors.danger }]}>{saveError}</Text> : null}
-
-          <View style={styles.footer}>
-            <Button disabled={isSaving} onPress={handleSave} title={t('editSave')} />
-          </View>
         </ScrollView>
+
+        <View
+          style={[
+            styles.submitBar,
+            {
+              borderTopColor: colors.border,
+              backgroundColor: colors.surface,
+              paddingBottom: Math.max(insets.bottom, 16),
+              ...(Platform.OS === 'ios'
+                ? {
+                    shadowColor: '#000000',
+                    shadowOffset: { width: 0, height: -3 },
+                    shadowOpacity: 0.08,
+                    shadowRadius: 10,
+                  }
+                : { elevation: 10 }),
+            },
+          ]}
+        >
+          {saveError ? <Text style={[styles.saveError, { color: colors.danger }]}>{saveError}</Text> : null}
+          <Button disabled={isSaving} onPress={handleSave} size="lg" title={t('editSave')} />
+        </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -273,7 +294,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 8,
-    paddingVertical: 10,
+    paddingTop: 14,
+    paddingBottom: 12,
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
   toolbarBtn: {
@@ -288,10 +310,13 @@ const styles = StyleSheet.create({
   toolbarSpacer: {
     width: 64,
   },
+  scrollView: {
+    flex: 1,
+  },
   scroll: {
     padding: 20,
     gap: 16,
-    paddingBottom: 40,
+    paddingBottom: 24,
   },
   groupLabel: {
     fontSize: 15,
@@ -316,9 +341,13 @@ const styles = StyleSheet.create({
   saveError: {
     fontSize: 15,
     fontWeight: '500',
+    marginBottom: 10,
   },
-  footer: {
-    marginTop: 8,
+  submitBar: {
+    paddingHorizontal: 20,
+    paddingTop: 14,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    gap: 0,
   },
   centered: {
     flex: 1,
