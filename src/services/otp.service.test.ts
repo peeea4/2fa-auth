@@ -59,6 +59,7 @@ describe('otpService', () => {
     it('бросает ошибку при пустом секрете', () => {
       expect(() => otpService.generateToken({ secret: '   ', timestamp: 0 })).toThrow('OTP secret is empty');
     });
+
   });
 
   describe('generateCurrentAndNextToken', () => {
@@ -82,6 +83,8 @@ describe('otpService', () => {
       );
       expect(parsed).toEqual({
         secret: 'JBSWY3DPEHPK3PXP',
+        type: 'totp',
+        counter: undefined,
         issuer: 'GitHub',
         account: 'user@example.com',
         algorithm: 'SHA1',
@@ -100,8 +103,8 @@ describe('otpService', () => {
       expect(() => otpService.parseOtpAuthUri('http://example.com')).toThrow('Invalid OTP URI scheme');
     });
 
-    it('отклоняет не-TOTP', () => {
-      expect(() => otpService.parseOtpAuthUri('otpauth://hotp/Label?secret=JBSWY3DPEHPK3PXP')).toThrow(
+    it('отклоняет неподдерживаемый тип', () => {
+      expect(() => otpService.parseOtpAuthUri('otpauth://steam/Label?secret=JBSWY3DPEHPK3PXP')).toThrow(
         'Only TOTP otpauth URIs are supported',
       );
     });

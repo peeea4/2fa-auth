@@ -14,15 +14,15 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
+import { OTP_ICON_PRESETS } from '../../constants';
 import { useTheme } from '../../hooks/useTheme';
 import { otpService } from '../../services/otp.service';
 import { storageService } from '../../services/storage.service';
 import { useOtpStore } from '../../stores';
-import type { OtpAlgorithm, OtpDigits, OtpPeriod } from '../../types';
+import type { OtpAlgorithm, OtpDigits } from '../../types';
 
 const ALGORITHMS: OtpAlgorithm[] = ['SHA1', 'SHA256', 'SHA512'];
 const DIGITS_OPTIONS: OtpDigits[] = [6, 8];
-const PERIOD_OPTIONS: OtpPeriod[] = [30, 60];
 
 function normalizeSecretInput(value: string): string {
   return value.replace(/\s/g, '').trim();
@@ -48,7 +48,8 @@ export default function EditOtpScreen() {
   const [secret, setSecret] = useState('');
   const [algorithm, setAlgorithm] = useState<OtpAlgorithm>('SHA1');
   const [digits, setDigits] = useState<OtpDigits>(6);
-  const [period, setPeriod] = useState<OtpPeriod>(30);
+  const [group, setGroup] = useState('');
+  const [iconKey, setIconKey] = useState(OTP_ICON_PRESETS[0]?.key ?? 'generic');
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [saveError, setSaveError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -61,7 +62,8 @@ export default function EditOtpScreen() {
     setAccount(entry.account);
     setAlgorithm(entry.algorithm);
     setDigits(entry.digits);
-    setPeriod(entry.period);
+    setGroup(entry.group ?? '');
+    setIconKey(entry.iconKey ?? OTP_ICON_PRESETS[0]?.key ?? 'generic');
     setSecret('');
     setFieldErrors({});
     setSaveError(null);
@@ -84,7 +86,7 @@ export default function EditOtpScreen() {
     }
 
     const normalizedSecret = normalizeSecretInput(secret);
-    if (normalizedSecret && !otpService.validateTotpSetup(normalizedSecret, algorithm, digits, period)) {
+    if (normalizedSecret && !otpService.validateTotpSetup(normalizedSecret, algorithm, digits, 30)) {
       nextErrors.secret = t('errorSecretInvalid');
     }
 
@@ -105,7 +107,12 @@ export default function EditOtpScreen() {
         account: trimmedAccount,
         algorithm,
         digits,
-        period,
+        period: 30,
+        type: 'totp',
+        counter: undefined,
+        group: group.trim() || undefined,
+        iconKey,
+        color: OTP_ICON_PRESETS.find((item) => item.key === iconKey)?.color ?? entry.color,
       });
 
       router.dismissTo('/(tabs)');
@@ -114,7 +121,7 @@ export default function EditOtpScreen() {
     } finally {
       setIsSaving(false);
     }
-  }, [account, algorithm, digits, entry, issuer, period, secret, t, upsertEntry]);
+  }, [account, algorithm, digits, entry, group, iconKey, issuer, secret, t, upsertEntry]);
 
   if (!id || !entry) {
     return (
@@ -230,15 +237,15 @@ export default function EditOtpScreen() {
               );
             })}
           </View>
-
-          <Text style={[styles.groupLabel, { color: colors.text }]}>{t('fieldPeriod')}</Text>
+          <Input label={t('fieldGroup')} onChangeText={setGroup} placeholder={t('fieldGroupPlaceholder')} value={group} />
+          <Text style={[styles.groupLabel, { color: colors.text }]}>{t('fieldIcon')}</Text>
           <View style={styles.segmentRow}>
-            {PERIOD_OPTIONS.map((value) => {
-              const selected = period === value;
+            {OTP_ICON_PRESETS.map((value) => {
+              const selected = iconKey === value.key;
               return (
                 <Pressable
-                  key={value}
-                  onPress={() => setPeriod(value)}
+                  key={value.key}
+                  onPress={() => setIconKey(value.key)}
                   style={[
                     styles.segment,
                     {
@@ -248,7 +255,7 @@ export default function EditOtpScreen() {
                   ]}
                 >
                   <Text style={[styles.segmentText, { color: selected ? colors.primary : colors.text }]}>
-                    {t('periodSeconds', { value })}
+                    {`${value.emoji} ${value.label}`}
                   </Text>
                 </Pressable>
               );

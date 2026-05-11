@@ -1,8 +1,9 @@
 import { Lock, Pencil, Trash2 } from 'lucide-react-native';
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { FlatList, Pressable, StyleSheet, Text, View, type ListRenderItem } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
+import DraggableFlatList, { ScaleDecorator, type RenderItemParams } from 'react-native-draggable-flatlist';
 
 import { useTheme } from '../../hooks/useTheme';
 import type { OtpEntry } from '../../types';
@@ -15,9 +16,12 @@ type OtpListProps = {
   entries: OtpEntry[];
   secretsById: Record<string, string | null | undefined>;
   isPremium: boolean;
+  grouped?: boolean;
   onEditEntry: (entry: OtpEntry) => void;
   onDeleteEntry: (entry: OtpEntry) => void;
   onLockedCardPress: () => void;
+  onReorderEntries: (entries: OtpEntry[]) => void;
+  isDragEnabled?: boolean;
   /** Space for tab bar + FAB (default only suits FAB). */
   listBottomInset?: number;
 };
@@ -26,9 +30,12 @@ export function OtpList({
   entries,
   secretsById,
   isPremium,
+  grouped = false,
   onEditEntry,
   onDeleteEntry,
   onLockedCardPress,
+  onReorderEntries,
+  isDragEnabled = true,
   listBottomInset = 100,
 }: OtpListProps) {
   const { t } = useTranslation();
@@ -64,8 +71,9 @@ export function OtpList({
     [colors, onDeleteEntry, onEditEntry, t],
   );
 
-  const renderItem: ListRenderItem<OtpEntry> = useCallback(
-    ({ item, index }) => {
+  const renderItem = useCallback(
+    ({ item, drag, isActive, getIndex }: RenderItemParams<OtpEntry>) => {
+      const index = getIndex() ?? 0;
       const isLocked = isOtpListCardLocked(isPremium, index);
       const secret = isLocked ? null : (secretsById[item.id] ?? null);
 
@@ -89,30 +97,65 @@ export function OtpList({
       }
 
       return (
-        <Swipeable
-          containerStyle={styles.cardWrap}
-          friction={2}
-          overshootRight={false}
-          overshootFriction={8}
-          renderRightActions={renderRightActions(item)}
-        >
-          <View style={styles.cardInner}>
-            <OtpCard entry={item} secret={secret} />
-          </View>
-        </Swipeable>
+        <ScaleDecorator activeScale={0.985}>
+          <Swipeable
+            containerStyle={styles.cardWrap}
+            friction={2}
+            overshootRight={false}
+            overshootFriction={8}
+            renderRightActions={renderRightActions(item)}
+          >
+            <View style={[styles.cardInner, isActive && styles.dragActiveCard]}>
+              <OtpCard
+                entry={item}
+                onLongPress={
+                  isDragEnabled
+                    ? () => {
+                        drag();
+                      }
+                    : undefined
+                }
+                secret={secret}
+              />
+            </View>
+          </Swipeable>
+        </ScaleDecorator>
       );
     },
-    [colors, isPremium, onLockedCardPress, renderRightActions, secretsById, t],
+    [
+      colors.background,
+      colors.border,
+      colors.surface,
+      colors.text,
+      colors.textMuted,
+      isDragEnabled,
+      isPremium,
+      onLockedCardPress,
+      renderRightActions,
+      secretsById,
+      t,
+    ],
   );
 
   return (
-    <FlatList
+    <DraggableFlatList
       data={entries}
       keyExtractor={(item) => item.id}
       renderItem={renderItem}
       contentContainerStyle={[styles.listContent, { paddingBottom: listBottomInset }]}
       ItemSeparatorComponent={() => <View style={styles.separator} />}
       keyboardShouldPersistTaps="handled"
+      dragItemOverflow={false}
+      onDragEnd={({ data }) => {
+        onReorderEntries(data);
+      }}
+      renderPlaceholder={() => <View style={styles.placeholder} />}
+      ListHeaderComponent={
+        grouped ? (
+          <Text style={[styles.groupHint, { color: colors.textMuted }]}>{t('groupedByCategoryHint')}</Text>
+        ) : undefined
+      }
+      activationDistance={16}
       showsVerticalScrollIndicator={false}
     />
   );
@@ -131,8 +174,20 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     overflow: 'hidden',
   },
+  dragActiveCard: {
+    opacity: 0.96,
+  },
   separator: {
     height: 12,
+  },
+  placeholder: {
+    borderRadius: 16,
+    height: 96,
+    opacity: 0.2,
+  },
+  groupHint: {
+    fontSize: 12,
+    marginBottom: 8,
   },
   swipeActions: {
     flexDirection: 'row',

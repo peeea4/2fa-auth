@@ -1,10 +1,12 @@
 import { generateSync, type HashAlgorithm } from 'otplib';
 
 import { config } from '../constants';
-import type { OtpAlgorithm, OtpDigits, OtpPeriod } from '../types';
+import type { OtpAlgorithm, OtpDigits, OtpPeriod, OtpType } from '../types';
 
 type GenerateTokenInput = {
   secret: string;
+  type?: OtpType;
+  counter?: number;
   algorithm?: OtpAlgorithm;
   digits?: OtpDigits;
   period?: OtpPeriod;
@@ -15,6 +17,8 @@ type GenerateCurrentAndNextTokenInput = Omit<GenerateTokenInput, 'timestamp'>;
 
 export type ParsedOtpAuthUri = {
   secret: string;
+  type: OtpType;
+  counter?: number;
   issuer: string;
   account: string;
   algorithm: OtpAlgorithm;
@@ -24,16 +28,13 @@ export type ParsedOtpAuthUri = {
 
 const SUPPORTED_ALGORITHMS: OtpAlgorithm[] = ['SHA1', 'SHA256', 'SHA512'];
 const SUPPORTED_DIGITS: OtpDigits[] = [6, 8];
-const SUPPORTED_PERIODS: OtpPeriod[] = [30, 60];
+const FIXED_TOTP_PERIOD: OtpPeriod = 30;
 
 const isOtpAlgorithm = (value: string): value is OtpAlgorithm =>
   SUPPORTED_ALGORITHMS.includes(value as OtpAlgorithm);
 
 const isOtpDigits = (value: number): value is OtpDigits =>
   SUPPORTED_DIGITS.includes(value as OtpDigits);
-
-const isOtpPeriod = (value: number): value is OtpPeriod =>
-  SUPPORTED_PERIODS.includes(value as OtpPeriod);
 
 const normalizeSecret = (secret: string): string => secret.replaceAll(' ', '').trim();
 
@@ -101,20 +102,26 @@ class OtpService {
 
   generateToken({
     secret,
+    type = 'totp',
     algorithm = config.defaultOtpAlgorithm,
     digits = config.defaultOtpDigits,
-    period = config.defaultOtpPeriod,
+    period = FIXED_TOTP_PERIOD,
     timestamp = Date.now(),
   }: GenerateTokenInput): string {
+    const normalizedSecret = normalizeSecret(secret);
+    if (!normalizedSecret) {
+      throw new Error('OTP secret is empty');
+    }
+    void type;
     const slot = Math.floor(timestamp / 1000 / period);
-    return this.getTokenForSlot(secret, algorithm, digits, period, slot);
+    return this.getTokenForSlot(normalizedSecret, algorithm, digits, period, slot);
   }
 
   generateCurrentAndNextToken({
     secret,
     algorithm = config.defaultOtpAlgorithm,
     digits = config.defaultOtpDigits,
-    period = config.defaultOtpPeriod,
+    period = FIXED_TOTP_PERIOD,
   }: GenerateCurrentAndNextTokenInput): { currentToken: string; nextToken: string } {
     const currentSlot = Math.floor(Date.now() / 1000 / period);
 
@@ -137,7 +144,8 @@ class OtpService {
       throw new Error('Invalid OTP URI');
     }
 
-    if (uri.hostname.toLowerCase() !== 'totp') {
+    const otpType = uri.hostname.toLowerCase();
+    if (otpType !== 'totp') {
       throw new Error('Only TOTP otpauth URIs are supported');
     }
 
@@ -161,16 +169,15 @@ class OtpService {
       throw new Error(`Unsupported OTP digits: ${rawDigits}`);
     }
 
-    const rawPeriod = Number(uri.searchParams.get('period') ?? config.defaultOtpPeriod);
-    if (!Number.isInteger(rawPeriod) || !isOtpPeriod(rawPeriod)) {
-      throw new Error(`Unsupported OTP period: ${rawPeriod}`);
-    }
+    const rawPeriod: OtpPeriod = FIXED_TOTP_PERIOD;
 
     const queryIssuer = (uri.searchParams.get('issuer') ?? '').trim();
     const issuer = queryIssuer || labelIssuer;
 
     return {
       secret,
+      type: 'totp',
+      counter: undefined,
       issuer,
       account,
       algorithm: rawAlgorithm,

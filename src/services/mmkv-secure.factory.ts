@@ -1,3 +1,4 @@
+import * as Crypto from "expo-crypto";
 import * as SecureStore from "expo-secure-store";
 import { createMMKV, type MMKV } from "react-native-mmkv";
 
@@ -16,8 +17,7 @@ function isJestWorker(): boolean {
 }
 
 function generateAes256BinaryKey(): string {
-  const bytes = new Uint8Array(32);
-  crypto.getRandomValues(bytes);
+  const bytes = Crypto.getRandomBytes(32);
   let key = "";
   for (let i = 0; i < 32; i++) {
     key += String.fromCharCode(bytes[i] ?? 0);

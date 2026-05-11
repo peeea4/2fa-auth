@@ -15,15 +15,15 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
+import { OTP_ICON_PRESETS } from '../../constants';
 import { useTheme } from '../../hooks/useTheme';
 import { otpService } from '../../services/otp.service';
 import { storageService } from '../../services/storage.service';
 import { useOtpStore } from '../../stores';
-import type { OtpAlgorithm, OtpDigits, OtpPeriod } from '../../types';
+import type { OtpAlgorithm, OtpDigits } from '../../types';
 
 const ALGORITHMS: OtpAlgorithm[] = ['SHA1', 'SHA256', 'SHA512'];
 const DIGITS_OPTIONS: OtpDigits[] = [6, 8];
-const PERIOD_OPTIONS: OtpPeriod[] = [30, 60];
 
 function createEntryId(): string {
   const bytes = Crypto.getRandomBytes(16);
@@ -53,13 +53,18 @@ export default function ManualEntryScreen() {
   const [secret, setSecret] = useState('');
   const [algorithm, setAlgorithm] = useState<OtpAlgorithm>('SHA1');
   const [digits, setDigits] = useState<OtpDigits>(6);
-  const [period, setPeriod] = useState<OtpPeriod>(30);
+  const [group, setGroup] = useState('');
+  const [iconKey, setIconKey] = useState(OTP_ICON_PRESETS[0]?.key ?? 'generic');
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [saveError, setSaveError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
   const handleClose = useCallback(() => {
-    router.back();
+    if (router.canGoBack()) {
+      router.back();
+      return;
+    }
+    router.dismissTo('/(tabs)');
   }, []);
 
   const handleSave = useCallback(async () => {
@@ -73,7 +78,7 @@ export default function ManualEntryScreen() {
     const normalizedSecret = normalizeSecretInput(secret);
     if (!normalizedSecret) {
       nextErrors.secret = t('errorSecretRequired');
-    } else if (!otpService.validateTotpSetup(normalizedSecret, algorithm, digits, period)) {
+    } else if (!otpService.validateTotpSetup(normalizedSecret, algorithm, digits, 30)) {
       nextErrors.secret = t('errorSecretInvalid');
     }
 
@@ -92,7 +97,12 @@ export default function ManualEntryScreen() {
         account: trimmedAccount,
         algorithm,
         digits,
-        period,
+        period: 30,
+        type: 'totp',
+        counter: undefined,
+        group: group.trim() || undefined,
+        iconKey,
+        color: OTP_ICON_PRESETS.find((item) => item.key === iconKey)?.color,
         createdAt: Date.now(),
       });
       router.dismissTo('/(tabs)');
@@ -101,7 +111,7 @@ export default function ManualEntryScreen() {
     } finally {
       setIsSaving(false);
     }
-  }, [account, algorithm, digits, issuer, period, secret, t, upsertEntry]);
+  }, [account, algorithm, digits, group, iconKey, issuer, secret, t, upsertEntry]);
 
   return (
     <SafeAreaView edges={['top', 'left', 'right']} style={[styles.safe, { backgroundColor: colors.background }]}>
@@ -178,7 +188,6 @@ export default function ManualEntryScreen() {
               );
             })}
           </View>
-
           <Text style={[styles.groupLabel, { color: colors.text }]}>{t('fieldDigits')}</Text>
           <View style={styles.segmentRow}>
             {DIGITS_OPTIONS.map((value) => {
@@ -200,15 +209,15 @@ export default function ManualEntryScreen() {
               );
             })}
           </View>
-
-          <Text style={[styles.groupLabel, { color: colors.text }]}>{t('fieldPeriod')}</Text>
+          <Input label={t('fieldGroup')} onChangeText={setGroup} placeholder={t('fieldGroupPlaceholder')} value={group} />
+          <Text style={[styles.groupLabel, { color: colors.text }]}>{t('fieldIcon')}</Text>
           <View style={styles.segmentRow}>
-            {PERIOD_OPTIONS.map((value) => {
-              const selected = period === value;
+            {OTP_ICON_PRESETS.map((value) => {
+              const selected = iconKey === value.key;
               return (
                 <Pressable
-                  key={value}
-                  onPress={() => setPeriod(value)}
+                  key={value.key}
+                  onPress={() => setIconKey(value.key)}
                   style={[
                     styles.segment,
                     {
@@ -218,7 +227,7 @@ export default function ManualEntryScreen() {
                   ]}
                 >
                   <Text style={[styles.segmentText, { color: selected ? colors.primary : colors.text }]}>
-                    {t('periodSeconds', { value })}
+                    {`${value.emoji} ${value.label}`}
                   </Text>
                 </Pressable>
               );

@@ -10,7 +10,8 @@
     "slide3Title": "Copiar con un toque",
     "slide3Subtitle": "Toca la tarjeta para copiar el código. La vibración y un aviso breve confirman el portapapeles.",
     "slide4Title": "Premium cuando lo necesites",
-    "slide4Subtitle": "Desbloquea escaneo QR, biometría y más límites — sigue en el plan gratuito hasta entonces."
+    "slide4Subtitle": "Desbloquea escaneo QR, biometría y más límites — sigue en el plan gratuito hasta entonces.",
+    "addFirstAccount": "Añadir primera cuenta"
   },
   "otpCard": {
     "copyLabel": "Copiar código de un solo uso",
@@ -143,5 +144,30 @@
     "aboutApp": "App",
     "aboutVersion": "Versión",
     "premiumActive": "Premium activo"
+  },
+  "fieldOtpType": "Tipo OTP",
+  "fieldHotpCounter": "Contador HOTP",
+  "fieldGroup": "Grupo (opcional)",
+  "fieldGroupPlaceholder": "p. ej. Trabajo",
+  "fieldIcon": "Icono",
+  "groupedByCategoryHint": "Agrupado por categoría",
+  "backup": {
+    "title": "Copia cifrada",
+    "description": "Exporta tus cuentas a JSON cifrado o impórtalas usando la misma contraseña.",
+    "passwordLabel": "Contraseña de copia",
+    "passwordHint": "Usa al menos 6 caracteres.",
+    "payloadLabel": "Payload cifrado",
+    "payloadHint": "Guarda este texto en un lugar seguro y la contraseña por separado.",
+    "exportCta": "Crear copia",
+    "importCta": "Importar copia",
+    "errorTitle": "Error de copia",
+    "errorBody": "No se pudieron procesar los datos de copia. Revisa contraseña y payload.",
+    "exportDoneTitle": "Copia creada",
+    "exportDoneBody": "El payload cifrado está listo para copiar.",
+    "importDoneTitle": "Importación completada",
+    "importDoneBody": "Se importaron {{count}} cuenta(s).",
+    "importEmptyTitle": "Nada para importar",
+    "importEmptyBody": "Primero pega un payload cifrado.",
+    "passwordTitle": "Se requiere contraseña"
   }
 }
