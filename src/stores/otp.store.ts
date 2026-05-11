@@ -25,9 +25,7 @@ const initialState: OtpStoreState = {
 
 const withOtpDefaults = (entry: OtpEntry): OtpEntry => ({
   ...entry,
-  type: 'totp',
-  period: 30,
-  counter: undefined,
+  period: entry.period ?? 30,
 });
 
 export const useOtpStore = create<OtpStore>()(

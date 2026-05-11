@@ -12,14 +12,16 @@ import {
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { IconPickerModal } from '../../components/icons/IconPickerModal';
+import { ServiceIcon } from '../../components/icons/ServiceIcon';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
-import { OTP_ICON_PRESETS } from '../../constants';
+import { REGISTRY_BY_KEY } from '../../constants/service-registry';
 import { useTheme } from '../../hooks/useTheme';
 import { otpService } from '../../services/otp.service';
 import { storageService } from '../../services/storage.service';
 import { useOtpStore } from '../../stores';
-import type { OtpAlgorithm, OtpDigits } from '../../types';
+import type { OtpAlgorithm, OtpDigits, OtpIconSource } from '../../types';
 
 const ALGORITHMS: OtpAlgorithm[] = ['SHA1', 'SHA256', 'SHA512'];
 const DIGITS_OPTIONS: OtpDigits[] = [6, 8];
@@ -49,7 +51,10 @@ export default function EditOtpScreen() {
   const [algorithm, setAlgorithm] = useState<OtpAlgorithm>('SHA1');
   const [digits, setDigits] = useState<OtpDigits>(6);
   const [group, setGroup] = useState('');
-  const [iconKey, setIconKey] = useState(OTP_ICON_PRESETS[0]?.key ?? 'generic');
+  const [iconKey, setIconKey] = useState<string | undefined>(undefined);
+  const [iconSource, setIconSource] = useState<OtpIconSource>('initials');
+  const [iconColor, setIconColor] = useState<string | undefined>(undefined);
+  const [isPickerVisible, setIsPickerVisible] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [saveError, setSaveError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -63,7 +68,12 @@ export default function EditOtpScreen() {
     setAlgorithm(entry.algorithm);
     setDigits(entry.digits);
     setGroup(entry.group ?? '');
-    setIconKey(entry.iconKey ?? OTP_ICON_PRESETS[0]?.key ?? 'generic');
+    setIconKey(entry.iconKey);
+    // Backward-compat migration: legacy entries store iconKey without iconSource.
+    // Treat any present iconKey as a service reference; ServiceIcon falls back to initials
+    // when the key isn't in the new registry.
+    setIconSource(entry.iconSource ?? (entry.iconKey ? 'service' : 'initials'));
+    setIconColor(entry.color);
     setSecret('');
     setFieldErrors({});
     setSaveError(null);
@@ -71,6 +81,36 @@ export default function EditOtpScreen() {
 
   const handleClose = useCallback(() => {
     router.back();
+  }, []);
+
+  const iconPreviewEntry = useMemo(
+    () => ({
+      id: entry?.id ?? 'edit-icon-preview',
+      issuer: issuer.trim() || account.trim() || t('fieldIssuer'),
+      account: account.trim() || 'preview',
+      algorithm,
+      digits,
+      period: 30 as const,
+      createdAt: entry?.createdAt ?? 0,
+      iconKey,
+      iconSource,
+      iconUrl: entry?.iconUrl,
+      color: iconColor,
+    }),
+    [account, algorithm, digits, entry?.createdAt, entry?.iconUrl, entry?.id, iconColor, iconKey, iconSource, issuer, t],
+  );
+
+  const handleIconSelect = useCallback((nextKey: string | null) => {
+    if (nextKey) {
+      const registryEntry = REGISTRY_BY_KEY[nextKey];
+      setIconKey(nextKey);
+      setIconSource('service');
+      setIconColor(registryEntry ? `#${registryEntry.hex}` : undefined);
+    } else {
+      setIconKey(undefined);
+      setIconSource('initials');
+      setIconColor(undefined);
+    }
   }, []);
 
   const handleSave = useCallback(async () => {
@@ -112,7 +152,8 @@ export default function EditOtpScreen() {
         counter: undefined,
         group: group.trim() || undefined,
         iconKey,
-        color: OTP_ICON_PRESETS.find((item) => item.key === iconKey)?.color ?? entry.color,
+        iconSource,
+        color: iconColor,
       });
 
       router.dismissTo('/(tabs)');
@@ -121,7 +162,7 @@ export default function EditOtpScreen() {
     } finally {
       setIsSaving(false);
     }
-  }, [account, algorithm, digits, entry, group, iconKey, issuer, secret, t, upsertEntry]);
+  }, [account, algorithm, digits, entry, group, iconColor, iconKey, iconSource, issuer, secret, t, upsertEntry]);
 
   if (!id || !entry) {
     return (
@@ -238,28 +279,29 @@ export default function EditOtpScreen() {
             })}
           </View>
           <Input label={t('fieldGroup')} onChangeText={setGroup} placeholder={t('fieldGroupPlaceholder')} value={group} />
+
           <Text style={[styles.groupLabel, { color: colors.text }]}>{t('fieldIcon')}</Text>
-          <View style={styles.segmentRow}>
-            {OTP_ICON_PRESETS.map((value) => {
-              const selected = iconKey === value.key;
-              return (
-                <Pressable
-                  key={value.key}
-                  onPress={() => setIconKey(value.key)}
-                  style={[
-                    styles.segment,
-                    {
-                      borderColor: selected ? colors.primary : colors.border,
-                      backgroundColor: selected ? colors.surface : colors.background,
-                    },
-                  ]}
-                >
-                  <Text style={[styles.segmentText, { color: selected ? colors.primary : colors.text }]}>
-                    {`${value.emoji} ${value.label}`}
-                  </Text>
-                </Pressable>
-              );
-            })}
+          <View style={styles.iconRow}>
+            <Pressable
+              accessibilityLabel={t('changeIcon')}
+              accessibilityRole="button"
+              onPress={() => setIsPickerVisible(true)}
+              style={[
+                styles.iconPreviewWrap,
+                { borderColor: colors.border, backgroundColor: colors.surface },
+              ]}
+            >
+              <ServiceIcon entry={iconPreviewEntry} size={44} />
+            </Pressable>
+            <View style={styles.iconRowAction}>
+              <Button
+                fullWidth={false}
+                onPress={() => setIsPickerVisible(true)}
+                size="md"
+                title={t('changeIcon')}
+                variant="secondary"
+              />
+            </View>
           </View>
         </ScrollView>
 
@@ -285,6 +327,13 @@ export default function EditOtpScreen() {
           <Button disabled={isSaving} onPress={handleSave} size="lg" title={t('editSave')} />
         </View>
       </KeyboardAvoidingView>
+
+      <IconPickerModal
+        onClose={() => setIsPickerVisible(false)}
+        onSelect={handleIconSelect}
+        selectedKey={iconKey ?? null}
+        visible={isPickerVisible}
+      />
     </SafeAreaView>
   );
 }
@@ -344,6 +393,22 @@ const styles = StyleSheet.create({
   segmentText: {
     fontSize: 15,
     fontWeight: '600',
+  },
+  iconRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  iconPreviewWrap: {
+    width: 60,
+    height: 60,
+    borderRadius: 14,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  iconRowAction: {
+    flexShrink: 1,
   },
   saveError: {
     fontSize: 15,

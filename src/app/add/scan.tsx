@@ -20,6 +20,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button } from '../../components/ui/Button';
 import { usePremium } from '../../hooks/usePremium';
 import { useTheme } from '../../hooks/useTheme';
+import { matchIssuerToIcon } from '../../services/icon-matching.service';
 import { otpService, type ParsedOtpAuthUri } from '../../services/otp.service';
 import { storageService } from '../../services/storage.service';
 import { useOtpStore } from '../../stores';
@@ -74,6 +75,7 @@ export default function ScanQrScreen() {
       }
 
       const id = createEntryId();
+      const matchedIcon = matchIssuerToIcon(parsed.issuer);
       await storageService.setOtpSecret(id, parsed.secret);
       upsertEntry({
         id,
@@ -84,6 +86,9 @@ export default function ScanQrScreen() {
         period: 30,
         type: 'totp',
         counter: undefined,
+        iconKey: matchedIcon?.key,
+        iconSource: matchedIcon ? 'service' : 'initials',
+        color: matchedIcon ? `#${matchedIcon.hex}` : undefined,
         createdAt: Date.now(),
       });
       await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);

@@ -150,6 +150,11 @@
   "fieldGroup": "Группа (необязательно)",
   "fieldGroupPlaceholder": "например, Работа",
   "fieldIcon": "Иконка",
+  "changeIcon": "Сменить иконку",
+  "iconPickerTitle": "Выбор иконки",
+  "iconPickerSearch": "Поиск сервисов",
+  "iconPickerNoMatch": "Совпадений не найдено",
+  "iconPickerNoIcon": "Без иконки",
   "groupedByCategoryHint": "Сгруппировано по категориям",
   "backup": {
     "title": "Зашифрованный бэкап",
