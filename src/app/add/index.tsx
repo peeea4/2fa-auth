@@ -16,7 +16,11 @@ export default function AddAccountMenuScreen() {
   const { canAddCode, canScanQr } = usePremium();
 
   const handleClose = useCallback(() => {
-    router.back();
+    if (router.canGoBack()) {
+      router.back();
+      return;
+    }
+    router.dismissTo('/(tabs)');
   }, []);
 
   const openPaywall = useCallback(() => {

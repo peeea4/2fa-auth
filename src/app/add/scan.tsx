@@ -58,7 +58,11 @@ export default function ScanQrScreen() {
   }, [syncSubscriptionStatus]);
 
   const handleClose = useCallback(() => {
-    router.back();
+    if (router.canGoBack()) {
+      router.back();
+      return;
+    }
+    router.dismissTo('/(tabs)');
   }, []);
 
   const persistParsed = useCallback(
@@ -77,7 +81,9 @@ export default function ScanQrScreen() {
         account: parsed.account,
         algorithm: parsed.algorithm,
         digits: parsed.digits,
-        period: parsed.period,
+        period: 30,
+        type: 'totp',
+        counter: undefined,
         createdAt: Date.now(),
       });
       await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);

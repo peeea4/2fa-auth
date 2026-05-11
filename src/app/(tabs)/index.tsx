@@ -44,6 +44,7 @@ export default function HomeScreen() {
   const tabBarHeight = useBottomTabBarHeight();
   const entries = useOtpStore((state) => state.entries);
   const removeEntry = useOtpStore((state) => state.removeEntry);
+  const reorderEntries = useOtpStore((state) => state.reorderEntries);
   const { premium } = usePremium();
 
   const [search, setSearch] = useState("");
@@ -72,18 +73,33 @@ export default function HomeScreen() {
   }, [entries]);
 
   const sortedFiltered = useMemo(() => {
-    const sorted = [...entries].sort((a, b) => b.createdAt - a.createdAt);
     const q = search.trim().toLowerCase();
-    if (!q) {
-      return sorted;
-    }
-    return sorted.filter(
-      (e) =>
-        e.issuer.toLowerCase().includes(q) ||
-        e.account.toLowerCase().includes(q) ||
-        e.id.toLowerCase().includes(q),
-    );
+    const filtered = !q
+      ? entries
+      : entries.filter(
+          (e) =>
+            e.issuer.toLowerCase().includes(q) ||
+            e.account.toLowerCase().includes(q) ||
+            (e.group ?? '').toLowerCase().includes(q) ||
+            e.id.toLowerCase().includes(q),
+        );
+
+    return [...filtered].sort((a, b) => {
+      const groupA = (a.group ?? '').trim().toLowerCase();
+      const groupB = (b.group ?? '').trim().toLowerCase();
+      if (groupA !== groupB) {
+        return groupA.localeCompare(groupB);
+      }
+      return a.createdAt - b.createdAt;
+    });
   }, [entries, search]);
+
+  const hasGroups = useMemo(
+    () => sortedFiltered.some((entry) => Boolean(entry.group?.trim())),
+    [sortedFiltered],
+  );
+
+  const isDragEnabled = search.trim().length === 0 && !hasGroups;
 
   const openPaywall = useCallback(() => {
     router.push("/paywall");
@@ -166,11 +182,14 @@ export default function HomeScreen() {
           ) : (
             <OtpList
               entries={sortedFiltered}
+              grouped={hasGroups}
+              isDragEnabled={isDragEnabled}
               isPremium={premium.isPremium}
               listBottomInset={tabBarHeight + 100}
               onDeleteEntry={confirmDeleteEntry}
               onEditEntry={handleEditEntry}
               onLockedCardPress={openPaywall}
+              onReorderEntries={reorderEntries}
               secretsById={secretsById}
             />
           )}

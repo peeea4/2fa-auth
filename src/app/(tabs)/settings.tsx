@@ -185,6 +185,19 @@ export default function SettingsScreen() {
       >
         <Text style={[styles.screenTitle, { color: colors.text }]}>{t('settings')}</Text>
 
+        <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>{t('settingsScreen.premium')}</Text>
+        <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+          {premium.isPremium ? (
+            <View style={styles.row}>
+              <Text style={[styles.rowLabel, { color: colors.text }]}>{t('settingsScreen.premiumActive')}</Text>
+            </View>
+          ) : (
+            <View style={styles.cardBody}>
+              <Button onPress={() => router.push('/paywall')} title={t('upgrade')} variant="primary" />
+            </View>
+          )}
+        </View>
+
         <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>{t('settingsScreen.security')}</Text>
         <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           <View style={styles.row}>
@@ -252,34 +265,12 @@ export default function SettingsScreen() {
         </Text>
         <SettingsInsetSelectList colors={colors} items={languageSelectItems} />
 
-        <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>{t('settingsScreen.premium')}</Text>
-        <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-          {premium.isPremium ? (
-            <View style={styles.row}>
-              <Text style={[styles.rowLabel, { color: colors.text }]}>{t('settingsScreen.premiumActive')}</Text>
-            </View>
-          ) : (
-            <View style={styles.cardBody}>
-              <Button onPress={() => router.push('/paywall')} title={t('upgrade')} variant="primary" />
-            </View>
-          )}
-        </View>
-
-        <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>{t('settingsScreen.about')}</Text>
-        <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-          <View style={styles.row}>
-            <Text style={[styles.rowLabel, { color: colors.text }]}>{t('settingsScreen.aboutApp')}</Text>
-            <Text style={[styles.rowValue, { color: colors.textMuted }]}>{config.appName}</Text>
-          </View>
-          <View style={[styles.divider, { backgroundColor: colors.border }]} />
-          <View style={styles.row}>
-            <Text style={[styles.rowLabel, { color: colors.text }]}>{t('settingsScreen.aboutVersion')}</Text>
-            <Text style={[styles.rowValue, { color: colors.textMuted }]}>{appVersion}</Text>
-          </View>
-        </View>
-
         <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>{t('settingsScreen.more')}</Text>
         <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+          <View style={styles.cardBody}>
+            <Button onPress={() => router.push('/backup')} title={t('backup.title')} variant="secondary" />
+          </View>
+          <View style={[styles.divider, { backgroundColor: colors.border }]} />
           <View style={styles.cardBody}>
             <Button onPress={handleShowOnboardingAgain} title={t('showOnboardingAgain')} variant="secondary" />
           </View>
@@ -315,6 +306,19 @@ export default function SettingsScreen() {
             </View>
           </>
         ) : null}
+
+        <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>{t('settingsScreen.about')}</Text>
+        <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+          <View style={styles.row}>
+            <Text style={[styles.rowLabel, { color: colors.text }]}>{t('settingsScreen.aboutApp')}</Text>
+            <Text style={[styles.rowValue, { color: colors.textMuted }]}>{config.appName}</Text>
+          </View>
+          <View style={[styles.divider, { backgroundColor: colors.border }]} />
+          <View style={styles.row}>
+            <Text style={[styles.rowLabel, { color: colors.text }]}>{t('settingsScreen.aboutVersion')}</Text>
+            <Text style={[styles.rowValue, { color: colors.textMuted }]}>{appVersion}</Text>
+          </View>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );

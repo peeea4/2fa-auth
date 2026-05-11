@@ -1,6 +1,8 @@
 import * as Haptics from 'expo-haptics';
+import { Copy } from 'lucide-react-native';
 import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Image } from 'react-native';
 import { Platform, Pressable, StyleSheet, Text, ToastAndroid, View } from 'react-native';
 import Animated, {
   useAnimatedStyle,
@@ -12,6 +14,7 @@ import Animated, {
 
 import { useOtpTimer } from '../../hooks/useOtpTimer';
 import { useTheme } from '../../hooks/useTheme';
+import { OTP_ICON_PRESETS_BY_KEY } from '../../constants';
 import { otpService } from '../../services/otp.service';
 import type { OtpDigits, OtpEntry } from '../../types';
 import { copyTextToClipboard } from '../../utils/copy-to-clipboard';
@@ -27,12 +30,13 @@ const formatDisplayCode = (code: string, digits: OtpDigits): string => {
 type OtpCardProps = {
   entry: OtpEntry;
   secret: string | null;
+  onLongPress?: () => void;
 };
 
-export function OtpCard({ entry, secret }: OtpCardProps) {
+export function OtpCard({ entry, secret, onLongPress }: OtpCardProps) {
   const { t } = useTranslation();
   const { colors } = useTheme();
-  const { timeLeft, currentSlot } = useOtpTimer({ period: entry.period });
+  const { timeLeft, currentSlot } = useOtpTimer({ period: 30 });
   const copiedOpacity = useSharedValue(0);
 
   const code = useMemo(() => {
@@ -43,11 +47,12 @@ export function OtpCard({ entry, secret }: OtpCardProps) {
     }
     return otpService.generateToken({
       secret,
+      type: 'totp',
       algorithm: entry.algorithm,
       digits: entry.digits,
-      period: entry.period,
+      period: 30,
     });
-  }, [currentSlot, entry.algorithm, entry.digits, entry.period, secret]);
+  }, [currentSlot, entry.algorithm, entry.digits, secret]);
 
   const displayCode = useMemo(() => {
     if (!secret) {
@@ -87,6 +92,8 @@ export function OtpCard({ entry, secret }: OtpCardProps) {
     }
   }, [code, secret, showCopiedFeedback, t]);
 
+  const presetIcon = entry.iconKey ? OTP_ICON_PRESETS_BY_KEY[entry.iconKey] : undefined;
+
   return (
     <View
       style={[
@@ -98,28 +105,51 @@ export function OtpCard({ entry, secret }: OtpCardProps) {
       ]}
     >
       <Pressable
-        accessibilityHint={t('otpCard.copyHint')}
-        accessibilityLabel={t('otpCard.copyLabel')}
         accessibilityRole="button"
-        disabled={!secret}
-        onPress={handleCopy}
-        style={({ pressed }) => [
-          styles.cardPressable,
-          {
-            opacity: !secret ? 0.92 : pressed ? 0.94 : 1,
-          },
-        ]}
+        delayLongPress={180}
+        onLongPress={onLongPress}
+        style={({ pressed }) => [styles.cardPressable, pressed && styles.cardPressed]}
       >
         <View style={[styles.accent, { backgroundColor: accent }]} />
 
         <View style={styles.body}>
           <View style={styles.header}>
-            <Text numberOfLines={1} style={[styles.issuer, { color: colors.text }]}>
-              {entry.issuer || t('title')}
-            </Text>
-            <Text numberOfLines={1} style={[styles.account, { color: colors.textMuted }]}>
-              {entry.account}
-            </Text>
+            <View style={styles.headerRow}>
+              {entry.iconUrl ? <Image source={{ uri: entry.iconUrl }} style={styles.icon} /> : null}
+              {!entry.iconUrl && presetIcon ? (
+                <View style={[styles.iconEmojiWrap, { backgroundColor: `${accent}22` }]}>
+                  <Text style={styles.iconEmoji}>{presetIcon.emoji}</Text>
+                </View>
+              ) : null}
+              <View style={styles.headerText}>
+                <Text numberOfLines={1} style={[styles.issuer, { color: colors.text }]}>
+                  {entry.issuer || t('title')}
+                </Text>
+                <Text numberOfLines={1} style={[styles.account, { color: colors.textMuted }]}>
+                  {entry.account}
+                </Text>
+              </View>
+              <Pressable
+                accessibilityHint={t('otpCard.copyHint')}
+                accessibilityLabel={t('otpCard.copyLabel')}
+                accessibilityRole="button"
+                disabled={!secret}
+                hitSlop={8}
+                onPress={() => {
+                  void handleCopy();
+                }}
+                style={({ pressed }) => [
+                  styles.copyButton,
+                  {
+                    borderColor: colors.border,
+                    backgroundColor: colors.background,
+                    opacity: !secret ? 0.5 : pressed ? 0.78 : 1,
+                  },
+                ]}
+              >
+                <Copy color={colors.text} size={16} strokeWidth={2.2} />
+              </Pressable>
+            </View>
           </View>
 
           <View style={styles.codeBlock}>
@@ -147,7 +177,7 @@ export function OtpCard({ entry, secret }: OtpCardProps) {
             ) : null}
           </View>
 
-          <CountdownBar fillColor={accent} period={entry.period} timeLeft={timeLeft} trackColor={colors.border} />
+          <CountdownBar fillColor={colors.primary} period={30} timeLeft={timeLeft} trackColor={colors.border} />
         </View>
       </Pressable>
     </View>
@@ -170,6 +200,9 @@ const styles = StyleSheet.create({
     flex: 1,
     alignSelf: 'stretch',
   },
+  cardPressed: {
+    opacity: 0.96,
+  },
   accent: {
     width: 4,
   },
@@ -181,6 +214,38 @@ const styles = StyleSheet.create({
   },
   header: {
     gap: 2,
+  },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  headerText: {
+    flex: 1,
+    minWidth: 0,
+  },
+  copyButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  icon: {
+    width: 24,
+    height: 24,
+    borderRadius: 6,
+  },
+  iconEmojiWrap: {
+    width: 24,
+    height: 24,
+    borderRadius: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  iconEmoji: {
+    fontSize: 14,
   },
   issuer: {
     fontSize: 17,

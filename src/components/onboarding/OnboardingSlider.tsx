@@ -91,6 +91,7 @@ type SlidePanelProps = {
   Icon: LucideIcon;
   iconColor: string;
   mutedColor: string;
+  codePreview?: string;
 };
 
 function SlidePanel({
@@ -102,6 +103,7 @@ function SlidePanel({
   Icon,
   iconColor,
   mutedColor,
+  codePreview,
 }: SlidePanelProps) {
   const contentStyle = useAnimatedStyle(() => {
     const inputRange = [(index - 1) * slideWidth, index * slideWidth, (index + 1) * slideWidth];
@@ -122,6 +124,11 @@ function SlidePanel({
         </View>
         <Text style={[styles.title, { color: iconColor }]}>{title}</Text>
         <Text style={[styles.subtitle, { color: mutedColor }]}>{subtitle}</Text>
+        {codePreview ? (
+          <View style={[styles.codePreviewWrap, { backgroundColor: `${iconColor}14` }]}>
+            <Text style={[styles.codePreview, { color: iconColor }]}>{codePreview}</Text>
+          </View>
+        ) : null}
       </Animated.View>
     </View>
   );
@@ -129,9 +136,10 @@ function SlidePanel({
 
 type OnboardingSliderProps = {
   onComplete: () => void;
+  onAddFirstAccount: () => void;
 };
 
-export function OnboardingSlider({ onComplete }: OnboardingSliderProps) {
+export function OnboardingSlider({ onComplete, onAddFirstAccount }: OnboardingSliderProps) {
   const { width: slideWidth } = useWindowDimensions();
   const { t } = useTranslation();
   const { colors } = useTheme();
@@ -186,6 +194,7 @@ export function OnboardingSlider({ onComplete }: OnboardingSliderProps) {
           slideWidth={slideWidth}
           subtitle={t(slide.subtitleKey)}
           title={t(slide.titleKey)}
+          codePreview={slide.key === 'secure' ? '248 091' : undefined}
         />
       )),
     [iconTint, muted, scrollX, slideWidth, t],
@@ -231,6 +240,9 @@ export function OnboardingSlider({ onComplete }: OnboardingSliderProps) {
           title={activeIndex >= lastIndex ? t('onboarding.getStarted') : t('onboarding.next')}
           variant="primary"
         />
+        {activeIndex >= lastIndex ? (
+          <Button onPress={onAddFirstAccount} size="lg" title={t('onboarding.addFirstAccount')} variant="secondary" />
+        ) : null}
       </View>
     </View>
   );
@@ -285,6 +297,18 @@ const styles = StyleSheet.create({
     fontSize: 17,
     lineHeight: 24,
     textAlign: 'center',
+  },
+  codePreviewWrap: {
+    marginTop: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 12,
+  },
+  codePreview: {
+    fontSize: 28,
+    fontWeight: '700',
+    letterSpacing: 2,
+    fontVariant: ['tabular-nums'],
   },
   footer: {
     paddingHorizontal: 20,
