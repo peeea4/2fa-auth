@@ -1,6 +1,6 @@
 import * as Crypto from 'expo-crypto';
 import { router } from 'expo-router';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   KeyboardAvoidingView,
@@ -13,14 +13,17 @@ import {
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { IconPickerModal } from '../../components/icons/IconPickerModal';
+import { ServiceIcon } from '../../components/icons/ServiceIcon';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
-import { OTP_ICON_PRESETS } from '../../constants';
+import { REGISTRY_BY_KEY } from '../../constants/service-registry';
 import { useTheme } from '../../hooks/useTheme';
+import { matchIssuerToIcon } from '../../services/icon-matching.service';
 import { otpService } from '../../services/otp.service';
 import { storageService } from '../../services/storage.service';
 import { useOtpStore } from '../../stores';
-import type { OtpAlgorithm, OtpDigits } from '../../types';
+import type { OtpAlgorithm, OtpDigits, OtpIconSource } from '../../types';
 
 const ALGORITHMS: OtpAlgorithm[] = ['SHA1', 'SHA256', 'SHA512'];
 const DIGITS_OPTIONS: OtpDigits[] = [6, 8];
@@ -54,7 +57,11 @@ export default function ManualEntryScreen() {
   const [algorithm, setAlgorithm] = useState<OtpAlgorithm>('SHA1');
   const [digits, setDigits] = useState<OtpDigits>(6);
   const [group, setGroup] = useState('');
-  const [iconKey, setIconKey] = useState(OTP_ICON_PRESETS[0]?.key ?? 'generic');
+  const [iconKey, setIconKey] = useState<string | undefined>(undefined);
+  const [iconSource, setIconSource] = useState<OtpIconSource>('initials');
+  const [iconColor, setIconColor] = useState<string | undefined>(undefined);
+  const [isIconManuallySet, setIsIconManuallySet] = useState(false);
+  const [isPickerVisible, setIsPickerVisible] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [saveError, setSaveError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -66,6 +73,53 @@ export default function ManualEntryScreen() {
     }
     router.dismissTo('/(tabs)');
   }, []);
+
+  const handleIconSelect = useCallback((nextKey: string | null) => {
+    setIsIconManuallySet(true);
+    if (nextKey) {
+      const registryEntry = REGISTRY_BY_KEY[nextKey];
+      setIconKey(nextKey);
+      setIconSource('service');
+      setIconColor(registryEntry ? `#${registryEntry.hex}` : undefined);
+    } else {
+      setIconKey(undefined);
+      setIconSource('initials');
+      setIconColor(undefined);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isIconManuallySet) {
+      return;
+    }
+
+    const timeoutId = setTimeout(() => {
+      const matchedIcon = matchIssuerToIcon(issuer);
+      setIconKey(matchedIcon?.key);
+      setIconSource(matchedIcon ? 'service' : 'initials');
+      setIconColor(matchedIcon ? `#${matchedIcon.hex}` : undefined);
+    }, 400);
+
+    return () => {
+      clearTimeout(timeoutId);
+    };
+  }, [isIconManuallySet, issuer]);
+
+  const iconPreviewEntry = useMemo(
+    () => ({
+      id: 'manual-icon-preview',
+      issuer: issuer.trim() || account.trim() || t('fieldIssuer'),
+      account: account.trim() || 'preview',
+      algorithm,
+      digits,
+      period: 30 as const,
+      createdAt: 0,
+      iconKey,
+      iconSource,
+      color: iconColor,
+    }),
+    [account, algorithm, digits, iconColor, iconKey, iconSource, issuer, t],
+  );
 
   const handleSave = useCallback(async () => {
     setSaveError(null);
@@ -102,7 +156,8 @@ export default function ManualEntryScreen() {
         counter: undefined,
         group: group.trim() || undefined,
         iconKey,
-        color: OTP_ICON_PRESETS.find((item) => item.key === iconKey)?.color,
+        iconSource,
+        color: iconColor,
         createdAt: Date.now(),
       });
       router.dismissTo('/(tabs)');
@@ -111,7 +166,7 @@ export default function ManualEntryScreen() {
     } finally {
       setIsSaving(false);
     }
-  }, [account, algorithm, digits, group, iconKey, issuer, secret, t, upsertEntry]);
+  }, [account, algorithm, digits, group, iconColor, iconKey, iconSource, issuer, secret, t, upsertEntry]);
 
   return (
     <SafeAreaView edges={['top', 'left', 'right']} style={[styles.safe, { backgroundColor: colors.background }]}>
@@ -146,13 +201,11 @@ export default function ManualEntryScreen() {
             value={account}
           />
 
-          <Input
-            autoCapitalize="none"
-            label={t('fieldIssuer')}
-            onChangeText={setIssuer}
-            placeholder={t('fieldIssuerPlaceholder')}
-            value={issuer}
-          />
+          <View style={styles.issuerHeader}>
+            <Text style={[styles.groupLabel, styles.issuerLabel, { color: colors.text }]}>{t('fieldIssuer')}</Text>
+            <ServiceIcon entry={iconPreviewEntry} size={32} />
+          </View>
+          <Input autoCapitalize="none" onChangeText={setIssuer} placeholder={t('fieldIssuerPlaceholder')} value={issuer} />
 
           <Input
             autoCapitalize="characters"
@@ -211,27 +264,27 @@ export default function ManualEntryScreen() {
           </View>
           <Input label={t('fieldGroup')} onChangeText={setGroup} placeholder={t('fieldGroupPlaceholder')} value={group} />
           <Text style={[styles.groupLabel, { color: colors.text }]}>{t('fieldIcon')}</Text>
-          <View style={styles.segmentRow}>
-            {OTP_ICON_PRESETS.map((value) => {
-              const selected = iconKey === value.key;
-              return (
-                <Pressable
-                  key={value.key}
-                  onPress={() => setIconKey(value.key)}
-                  style={[
-                    styles.segment,
-                    {
-                      borderColor: selected ? colors.primary : colors.border,
-                      backgroundColor: selected ? colors.surface : colors.background,
-                    },
-                  ]}
-                >
-                  <Text style={[styles.segmentText, { color: selected ? colors.primary : colors.text }]}>
-                    {`${value.emoji} ${value.label}`}
-                  </Text>
-                </Pressable>
-              );
-            })}
+          <View style={styles.iconRow}>
+            <Pressable
+              accessibilityLabel={t('changeIcon')}
+              accessibilityRole="button"
+              onPress={() => setIsPickerVisible(true)}
+              style={[
+                styles.iconPreviewWrap,
+                { borderColor: colors.border, backgroundColor: colors.surface },
+              ]}
+            >
+              <ServiceIcon entry={iconPreviewEntry} size={44} />
+            </Pressable>
+            <View style={styles.iconRowAction}>
+              <Button
+                fullWidth={false}
+                onPress={() => setIsPickerVisible(true)}
+                size="md"
+                title={t('changeIcon')}
+                variant="secondary"
+              />
+            </View>
           </View>
 
         </ScrollView>
@@ -258,6 +311,13 @@ export default function ManualEntryScreen() {
           <Button disabled={isSaving} onPress={handleSave} size="lg" title={t('manualSave')} />
         </View>
       </KeyboardAvoidingView>
+
+      <IconPickerModal
+        onClose={() => setIsPickerVisible(false)}
+        onSelect={handleIconSelect}
+        selectedKey={iconKey ?? null}
+        visible={isPickerVisible}
+      />
     </SafeAreaView>
   );
 }
@@ -303,6 +363,14 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginTop: 4,
   },
+  issuerHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  issuerLabel: {
+    marginTop: 0,
+  },
   segmentRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -317,6 +385,22 @@ const styles = StyleSheet.create({
   segmentText: {
     fontSize: 15,
     fontWeight: '600',
+  },
+  iconRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  iconPreviewWrap: {
+    width: 60,
+    height: 60,
+    borderRadius: 14,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  iconRowAction: {
+    flexShrink: 1,
   },
   saveError: {
     fontSize: 15,

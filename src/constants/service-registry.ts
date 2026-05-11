@@ -1,0 +1,247 @@
+import * as simpleIcons from 'simple-icons';
+
+type SimpleIcon = {
+  title: string;
+  slug: string;
+  hex: string;
+  path: string;
+};
+
+export type ServiceIconEntry = {
+  key: string;
+  label: string;
+  hex: string;
+  svgPath: string;
+  aliases: string[];
+};
+
+const SIMPLE_ICON_LIST = Object.values(simpleIcons).filter(
+  (icon): icon is SimpleIcon =>
+    Boolean(icon) &&
+    typeof icon === 'object' &&
+    'slug' in icon &&
+    'title' in icon &&
+    'hex' in icon &&
+    'path' in icon,
+);
+
+const SIMPLE_ICON_BY_SLUG = new Map(SIMPLE_ICON_LIST.map((icon) => [icon.slug, icon]));
+
+const CURATED_SERVICE_KEYS = [
+  'google',
+  'gmail',
+  'googlecloud',
+  'googleanalytics',
+  'googleads',
+  'youtube',
+  'youtubeshorts',
+  'googledrive',
+  'googlemaps',
+  'googleplay',
+  'github',
+  'gitlab',
+  'bitbucket',
+  'jira',
+  'confluence',
+  'notion',
+  'discord',
+  'figma',
+  'linear',
+  'trello',
+  'asana',
+  'clickup',
+  'airtable',
+  'dropbox',
+  'box',
+  'icloud',
+  'mega',
+  'protondrive',
+  'apple',
+  'safari',
+  'xcode',
+  'android',
+  'netflix',
+  'spotify',
+  'applemusic',
+  'twitch',
+  'steam',
+  'epicgames',
+  'ea',
+  'ubisoft',
+  'riotgames',
+  'playstation',
+  'roblox',
+  'fortnite',
+  'paypal',
+  'stripe',
+  'visa',
+  'mastercard',
+  'americanexpress',
+  'discover',
+  'bitcoin',
+  'ethereum',
+  'coinbase',
+  'binance',
+  'wise',
+  'revolut',
+  'shopify',
+  'woocommerce',
+  'bigcommerce',
+  'etsy',
+  'ebay',
+  'aliexpress',
+  'target',
+  'ikea',
+  'framer',
+  'webflow',
+  'wordpress',
+  'wix',
+  'squarespace',
+  'cloudflare',
+  'vercel',
+  'netlify',
+  'digitalocean',
+  'render',
+  'supabase',
+  'firebase',
+  'mongodb',
+  'postgresql',
+  'mysql',
+  'sqlite',
+  'redis',
+  'prisma',
+  'planetscale',
+  'docker',
+  'kubernetes',
+  'helm',
+  'terraform',
+  'ansible',
+  'jenkins',
+  'circleci',
+  'travisci',
+  'githubactions',
+  'npm',
+  'pnpm',
+  'yarn',
+  'bun',
+  'deno',
+  'nodedotjs',
+  'react',
+  'nextdotjs',
+  'vuedotjs',
+  'angular',
+  'svelte',
+  'expo',
+  'tailwindcss',
+  'bootstrap',
+  'sass',
+  'eslint',
+  'prettier',
+  'typescript',
+  'javascript',
+  'python',
+  'go',
+  'rust',
+  'c',
+  'cplusplus',
+  'swift',
+  'kotlin',
+  'php',
+  'ruby',
+  'dotnet',
+  'spring',
+  'laravel',
+  'django',
+  'flask',
+  'fastapi',
+  'graphql',
+  'anthropic',
+  'huggingface',
+  'ollama',
+  'tensorflow',
+  'pytorch',
+  'opencv',
+  'jupyter',
+  'kaggle',
+  'linux',
+  'ubuntu',
+  'debian',
+  'fedora',
+  'archlinux',
+  'redhat',
+  'nginx',
+  'apache',
+  'proxmox',
+  'homeassistant',
+  'raspberrypi',
+  'arduino',
+  'intel',
+  'amd',
+  'nvidia',
+  'qualcomm',
+  'tesla',
+  'uber',
+  'lyft',
+  'airbnb',
+  'bookingdotcom',
+  'tripadvisor',
+  'expedia',
+  'telegram',
+  'whatsapp',
+  'signal',
+  'messenger',
+  'instagram',
+  'facebook',
+  'x',
+  'threads',
+  'reddit',
+  'tiktok',
+  'snapchat',
+  'pinterest',
+] as const;
+
+const EXTRA_ALIASES: Record<string, string[]> = {
+  google: ['googleauth', 'googleauthenticator', 'googleworkspace'],
+  gmail: ['googlemail'],
+  github: ['gh'],
+  discord: ['discordapp'],
+  x: ['twitter', 'twitterx'],
+  messenger: ['facebookmessenger'],
+  facebook: ['meta'],
+  anthropic: ['claude'],
+  dotnet: ['.net', 'dotnetcore'],
+  nodedotjs: ['node', 'nodejs'],
+  nextdotjs: ['next', 'nextjs'],
+  vuedotjs: ['vue', 'vuejs'],
+  react: ['reactjs'],
+  angular: ['angularjs'],
+  telegram: ['telegrammessenger'],
+  whatsapp: ['wa'],
+  signal: ['signalapp'],
+  bookingdotcom: ['booking'],
+};
+
+export const SERVICE_REGISTRY: ServiceIconEntry[] = CURATED_SERVICE_KEYS.flatMap((key) => {
+  const icon = SIMPLE_ICON_BY_SLUG.get(key);
+  if (!icon) {
+    return [];
+  }
+
+  return [
+    {
+      key,
+      label: icon.title,
+      hex: icon.hex,
+      svgPath: icon.path,
+      aliases: EXTRA_ALIASES[key] ?? [],
+    },
+  ];
+});
+
+export const REGISTRY_BY_KEY: Record<string, ServiceIconEntry> = Object.fromEntries(
+  SERVICE_REGISTRY.map((entry) => [entry.key, entry]),
+);
+
+export const REGISTRY_BY_ALIAS: Record<string, ServiceIconEntry> = Object.fromEntries(
+  SERVICE_REGISTRY.flatMap((entry) => entry.aliases.map((alias) => [alias, entry])),
+);

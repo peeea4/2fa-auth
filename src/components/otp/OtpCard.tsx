@@ -2,7 +2,6 @@ import * as Haptics from 'expo-haptics';
 import { Copy } from 'lucide-react-native';
 import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Image } from 'react-native';
 import { Platform, Pressable, StyleSheet, Text, ToastAndroid, View } from 'react-native';
 import Animated, {
   useAnimatedStyle,
@@ -14,10 +13,10 @@ import Animated, {
 
 import { useOtpTimer } from '../../hooks/useOtpTimer';
 import { useTheme } from '../../hooks/useTheme';
-import { OTP_ICON_PRESETS_BY_KEY } from '../../constants';
 import { otpService } from '../../services/otp.service';
 import type { OtpDigits, OtpEntry } from '../../types';
 import { copyTextToClipboard } from '../../utils/copy-to-clipboard';
+import { ServiceIcon } from '../icons/ServiceIcon';
 import { CountdownBar } from './CountdownBar';
 
 const formatDisplayCode = (code: string, digits: OtpDigits): string => {
@@ -92,8 +91,6 @@ export function OtpCard({ entry, secret, onLongPress }: OtpCardProps) {
     }
   }, [code, secret, showCopiedFeedback, t]);
 
-  const presetIcon = entry.iconKey ? OTP_ICON_PRESETS_BY_KEY[entry.iconKey] : undefined;
-
   return (
     <View
       style={[
@@ -115,12 +112,7 @@ export function OtpCard({ entry, secret, onLongPress }: OtpCardProps) {
         <View style={styles.body}>
           <View style={styles.header}>
             <View style={styles.headerRow}>
-              {entry.iconUrl ? <Image source={{ uri: entry.iconUrl }} style={styles.icon} /> : null}
-              {!entry.iconUrl && presetIcon ? (
-                <View style={[styles.iconEmojiWrap, { backgroundColor: `${accent}22` }]}>
-                  <Text style={styles.iconEmoji}>{presetIcon.emoji}</Text>
-                </View>
-              ) : null}
+              <ServiceIcon entry={entry} size={32} />
               <View style={styles.headerText}>
                 <Text numberOfLines={1} style={[styles.issuer, { color: colors.text }]}>
                   {entry.issuer || t('title')}
@@ -218,7 +210,7 @@ const styles = StyleSheet.create({
   headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
+    gap: 12,
   },
   headerText: {
     flex: 1,
@@ -231,21 +223,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  icon: {
-    width: 24,
-    height: 24,
-    borderRadius: 6,
-  },
-  iconEmojiWrap: {
-    width: 24,
-    height: 24,
-    borderRadius: 6,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  iconEmoji: {
-    fontSize: 14,
   },
   issuer: {
     fontSize: 17,

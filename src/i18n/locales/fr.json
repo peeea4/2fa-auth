@@ -150,6 +150,11 @@
   "fieldGroup": "Groupe (optionnel)",
   "fieldGroupPlaceholder": "ex. Travail",
   "fieldIcon": "Icône",
+  "changeIcon": "Changer l’icône",
+  "iconPickerTitle": "Choisir une icône",
+  "iconPickerSearch": "Rechercher un service",
+  "iconPickerNoMatch": "Aucun service correspondant",
+  "iconPickerNoIcon": "Sans icône",
   "groupedByCategoryHint": "Groupé par catégorie",
   "backup": {
     "title": "Sauvegarde chiffrée",

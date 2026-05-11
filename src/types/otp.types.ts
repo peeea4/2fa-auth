@@ -4,6 +4,7 @@ export type OtpDigits = 6 | 8;
 
 export type OtpPeriod = 30;
 export type OtpType = 'totp';
+export type OtpIconSource = 'service' | 'custom' | 'initials';
 
 export interface OtpEntry {
   id: string;
@@ -17,6 +18,7 @@ export interface OtpEntry {
   createdAt: number;
   iconUrl?: string;
   iconKey?: string;
+  iconSource?: OtpIconSource;
   color?: string;
   group?: string;
 }

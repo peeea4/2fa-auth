@@ -150,6 +150,11 @@
   "fieldGroup": "Grupo (opcional)",
   "fieldGroupPlaceholder": "p. ej. Trabajo",
   "fieldIcon": "Icono",
+  "changeIcon": "Cambiar icono",
+  "iconPickerTitle": "Elegir icono",
+  "iconPickerSearch": "Buscar servicios",
+  "iconPickerNoMatch": "No hay servicios coincidentes",
+  "iconPickerNoIcon": "Sin icono",
   "groupedByCategoryHint": "Agrupado por categoría",
   "backup": {
     "title": "Copia cifrada",
