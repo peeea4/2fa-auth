@@ -14,14 +14,17 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { IconPickerModal } from '../../components/icons/IconPickerModal';
 import { ServiceIcon } from '../../components/icons/ServiceIcon';
+import { OtpCardPreview } from '../../components/otp/OtpCardPreview';
 import { Button } from '../../components/ui/Button';
+import { CollapsibleSection } from '../../components/ui/CollapsibleSection';
 import { Input } from '../../components/ui/Input';
+import { SectionHeader } from '../../components/ui/SectionHeader';
 import { REGISTRY_BY_KEY } from '../../constants/service-registry';
 import { useTheme } from '../../hooks/useTheme';
 import { otpService } from '../../services/otp.service';
 import { storageService } from '../../services/storage.service';
 import { useOtpStore } from '../../stores';
-import type { OtpAlgorithm, OtpDigits, OtpIconSource } from '../../types';
+import type { OtpAlgorithm, OtpDigits, OtpEntry, OtpIconSource } from '../../types';
 
 const ALGORITHMS: OtpAlgorithm[] = ['SHA1', 'SHA256', 'SHA512'];
 const DIGITS_OPTIONS: OtpDigits[] = [6, 8];
@@ -58,6 +61,25 @@ export default function EditOtpScreen() {
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [saveError, setSaveError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [advancedExpanded, setAdvancedExpanded] = useState(false);
+  const [previewBackingSecret, setPreviewBackingSecret] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!id) {
+      setPreviewBackingSecret(null);
+      return;
+    }
+    let cancelled = false;
+    void (async () => {
+      const s = await storageService.getOtpSecret(id);
+      if (!cancelled) {
+        setPreviewBackingSecret(s);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [id]);
 
   useEffect(() => {
     if (!entry) {
@@ -69,28 +91,26 @@ export default function EditOtpScreen() {
     setDigits(entry.digits);
     setGroup(entry.group ?? '');
     setIconKey(entry.iconKey);
-    // Backward-compat migration: legacy entries store iconKey without iconSource.
-    // Treat any present iconKey as a service reference; ServiceIcon falls back to initials
-    // when the key isn't in the new registry.
     setIconSource(entry.iconSource ?? (entry.iconKey ? 'service' : 'initials'));
     setIconColor(entry.color);
     setSecret('');
     setFieldErrors({});
     setSaveError(null);
+    setAdvancedExpanded(entry.algorithm !== 'SHA1' || entry.digits !== 6);
   }, [entry]);
 
   const handleClose = useCallback(() => {
     router.back();
   }, []);
 
-  const iconPreviewEntry = useMemo(
+  const iconPreviewEntry: OtpEntry = useMemo(
     () => ({
       id: entry?.id ?? 'edit-icon-preview',
       issuer: issuer.trim() || account.trim() || t('fieldIssuer'),
       account: account.trim() || 'preview',
       algorithm,
       digits,
-      period: 30 as const,
+      period: 30,
       createdAt: entry?.createdAt ?? 0,
       iconKey,
       iconSource,
@@ -202,6 +222,9 @@ export default function EditOtpScreen() {
           showsVerticalScrollIndicator={false}
           style={styles.scrollView}
         >
+          <OtpCardPreview backingSecret={previewBackingSecret} entry={iconPreviewEntry} secretDraft={secret} />
+
+          <SectionHeader title={t('formSectionIdentity')} />
           <Input
             autoCapitalize="words"
             error={fieldErrors.account}
@@ -212,15 +235,25 @@ export default function EditOtpScreen() {
             }}
             placeholder={t('fieldAccountPlaceholder')}
             value={account}
+            variant="filled"
           />
-
           <Input
+            autoCapitalize="none"
             label={t('fieldIssuer')}
             onChangeText={setIssuer}
             placeholder={t('fieldIssuerPlaceholder')}
             value={issuer}
+            variant="filled"
+          />
+          <Input
+            label={t('fieldGroup')}
+            onChangeText={setGroup}
+            placeholder={t('fieldGroupPlaceholder')}
+            value={group}
+            variant="filled"
           />
 
+          <SectionHeader title={t('formSectionAuthentication')} />
           <Input
             autoCapitalize="characters"
             autoCorrect={false}
@@ -233,53 +266,10 @@ export default function EditOtpScreen() {
             }}
             placeholder={t('fieldSecretPlaceholder')}
             value={secret}
+            variant="filled"
           />
 
-          <Text style={[styles.groupLabel, { color: colors.text }]}>{t('fieldAlgorithm')}</Text>
-          <View style={styles.segmentRow}>
-            {ALGORITHMS.map((value) => {
-              const selected = algorithm === value;
-              return (
-                <Pressable
-                  key={value}
-                  onPress={() => setAlgorithm(value)}
-                  style={[
-                    styles.segment,
-                    {
-                      borderColor: selected ? colors.primary : colors.border,
-                      backgroundColor: selected ? colors.surface : colors.background,
-                    },
-                  ]}
-                >
-                  <Text style={[styles.segmentText, { color: selected ? colors.primary : colors.text }]}>{value}</Text>
-                </Pressable>
-              );
-            })}
-          </View>
-
-          <Text style={[styles.groupLabel, { color: colors.text }]}>{t('fieldDigits')}</Text>
-          <View style={styles.segmentRow}>
-            {DIGITS_OPTIONS.map((value) => {
-              const selected = digits === value;
-              return (
-                <Pressable
-                  key={value}
-                  onPress={() => setDigits(value)}
-                  style={[
-                    styles.segment,
-                    {
-                      borderColor: selected ? colors.primary : colors.border,
-                      backgroundColor: selected ? colors.surface : colors.background,
-                    },
-                  ]}
-                >
-                  <Text style={[styles.segmentText, { color: selected ? colors.primary : colors.text }]}>{String(value)}</Text>
-                </Pressable>
-              );
-            })}
-          </View>
-          <Input label={t('fieldGroup')} onChangeText={setGroup} placeholder={t('fieldGroupPlaceholder')} value={group} />
-
+          <SectionHeader title={t('formSectionAppearance')} />
           <Text style={[styles.groupLabel, { color: colors.text }]}>{t('fieldIcon')}</Text>
           <View style={styles.iconRow}>
             <Pressable
@@ -291,7 +281,7 @@ export default function EditOtpScreen() {
                 { borderColor: colors.border, backgroundColor: colors.surface },
               ]}
             >
-              <ServiceIcon entry={iconPreviewEntry} size={44} />
+              <ServiceIcon entry={iconPreviewEntry} size={64} />
             </Pressable>
             <View style={styles.iconRowAction}>
               <Button
@@ -303,6 +293,57 @@ export default function EditOtpScreen() {
               />
             </View>
           </View>
+
+          <CollapsibleSection
+            expanded={advancedExpanded}
+            onToggle={() => setAdvancedExpanded((v) => !v)}
+            title={t('formSectionAdvanced')}
+          >
+            <Text style={[styles.groupLabel, { color: colors.text }]}>{t('fieldAlgorithm')}</Text>
+            <View style={styles.segmentRow}>
+              {ALGORITHMS.map((value) => {
+                const selected = algorithm === value;
+                return (
+                  <Pressable
+                    key={value}
+                    onPress={() => setAlgorithm(value)}
+                    style={[
+                      styles.segment,
+                      {
+                        borderColor: selected ? colors.primary : colors.border,
+                        backgroundColor: selected ? colors.surface : colors.background,
+                      },
+                    ]}
+                  >
+                    <Text style={[styles.segmentText, { color: selected ? colors.primary : colors.text }]}>{value}</Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+            <Text style={[styles.groupLabel, { color: colors.text }]}>{t('fieldDigits')}</Text>
+            <View style={styles.segmentRow}>
+              {DIGITS_OPTIONS.map((value) => {
+                const selected = digits === value;
+                return (
+                  <Pressable
+                    key={value}
+                    onPress={() => setDigits(value)}
+                    style={[
+                      styles.segment,
+                      {
+                        borderColor: selected ? colors.primary : colors.border,
+                        backgroundColor: selected ? colors.surface : colors.background,
+                      },
+                    ]}
+                  >
+                    <Text style={[styles.segmentText, { color: selected ? colors.primary : colors.text }]}>
+                      {String(value)}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+          </CollapsibleSection>
         </ScrollView>
 
         <View
@@ -400,9 +441,9 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   iconPreviewWrap: {
-    width: 60,
-    height: 60,
-    borderRadius: 14,
+    width: 80,
+    height: 80,
+    borderRadius: 18,
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',

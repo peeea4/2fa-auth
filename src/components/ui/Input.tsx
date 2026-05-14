@@ -4,15 +4,22 @@ import { StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { useTheme } from '../../hooks/useTheme';
 
+export type InputVariant = 'outline' | 'filled';
+
 type InputProps = TextInputProps & {
   label?: string;
   hint?: string;
   error?: string;
+  variant?: InputVariant;
 };
 
-export const Input = forwardRef<TextInput, InputProps>(function Input({ label, hint, error, style, ...props }, ref) {
+export const Input = forwardRef<TextInput, InputProps>(function Input(
+  { label, hint, error, style, variant = 'outline', ...props },
+  ref,
+) {
   const { colors } = useTheme();
   const helperText = error ?? hint;
+  const filled = variant === 'filled';
 
   return (
     <View style={styles.wrapper}>
@@ -22,10 +29,11 @@ export const Input = forwardRef<TextInput, InputProps>(function Input({ label, h
         placeholderTextColor={colors.textMuted}
         style={[
           styles.input,
+          filled ? styles.inputFilled : styles.inputOutline,
           {
             color: colors.text,
-            borderColor: error ? colors.danger : colors.border,
-            backgroundColor: colors.surface,
+            backgroundColor: colors.surface2,
+            ...(!filled ? { borderColor: error ? colors.danger : colors.border } : {}),
           },
           style,
         ]}
@@ -50,11 +58,16 @@ const styles = StyleSheet.create({
   input: {
     width: '100%',
     minHeight: 44,
-    borderWidth: 1,
     borderRadius: 12,
     paddingHorizontal: 14,
     paddingVertical: 10,
     fontSize: 16,
+  },
+  inputOutline: {
+    borderWidth: 1,
+  },
+  inputFilled: {
+    borderWidth: 0,
   },
   helper: {
     fontSize: 13,

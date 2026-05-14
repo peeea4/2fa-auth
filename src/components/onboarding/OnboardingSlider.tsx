@@ -1,5 +1,5 @@
 import type { LucideIcon } from 'lucide-react-native';
-import { Copy, QrCode, ShieldCheck, Sparkles } from 'lucide-react-native';
+import { Copy, GripVertical, QrCode, ShieldCheck } from 'lucide-react-native';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
@@ -42,10 +42,10 @@ const SLIDES: SlideDef[] = [
     Icon: Copy,
   },
   {
-    key: 'premium',
+    key: 'gestures',
     titleKey: 'onboarding.slide4Title',
     subtitleKey: 'onboarding.slide4Subtitle',
-    Icon: Sparkles,
+    Icon: GripVertical,
   },
 ];
 

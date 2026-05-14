@@ -30,9 +30,11 @@ type OtpCardProps = {
   entry: OtpEntry;
   secret: string | null;
   onLongPress?: () => void;
+  /** Подсказка для основной области карточки (например, свайп в списке). */
+  accessibilityHint?: string;
 };
 
-export function OtpCard({ entry, secret, onLongPress }: OtpCardProps) {
+export function OtpCard({ entry, secret, onLongPress, accessibilityHint: cardAccessibilityHint }: OtpCardProps) {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const { timeLeft, currentSlot } = useOtpTimer({ period: 30 });
@@ -102,6 +104,7 @@ export function OtpCard({ entry, secret, onLongPress }: OtpCardProps) {
       ]}
     >
       <Pressable
+        accessibilityHint={cardAccessibilityHint}
         accessibilityRole="button"
         delayLongPress={180}
         onLongPress={onLongPress}

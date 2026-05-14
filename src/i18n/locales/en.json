@@ -9,8 +9,8 @@
     "slide2Subtitle": "Scan a QR code from the service or enter the setup key manually.",
     "slide3Title": "Copy in one tap",
     "slide3Subtitle": "Tap the card to copy the code. Haptics and a short confirmation tell you it’s on the clipboard.",
-    "slide4Title": "Premium when you need more",
-    "slide4Subtitle": "Unlock QR scanning, biometrics, and higher limits — stay on free tier until then.",
+    "slide4Title": "Manage your accounts",
+    "slide4Subtitle": "Swipe left on a card to edit or delete. Press and hold to drag and reorder.",
     "addFirstAccount": "Add first account"
   },
   "otpCard": {
@@ -46,7 +46,7 @@
   "devPremiumToggle": "Premium preview (dev)",
   "devPremiumHint": "Treats the app as Premium: QR scan, no 5-code lock overlay, and premium gates from usePremium. Release builds ignore this.",
   "tabCodes": "Codes",
-  "homeHeading": "Authenticator codes",
+  "homeHeading": "2FA Codes",
   "openPaywall": "Open subscription",
   "checking": "Checking…",
   "done": "Done",
@@ -78,6 +78,9 @@
   "unknownId": "unknown",
   "cancel": "Cancel",
   "edit": "Edit",
+  "coachMarkSwipeHint": "Swipe left on the card to edit or delete.",
+  "coachMarkDismiss": "Got it",
+  "swipeableCardHint": "Swipe left for edit and delete. Long press to reorder.",
   "swipeEdit": "Edit",
   "swipeDelete": "Delete",
   "delete": "Delete",
@@ -97,6 +100,11 @@
   "emptySearchTitle": "No matches",
   "emptySearchSubtitle": "Try a different search term.",
   "manualScreenTitle": "Manual entry",
+  "formSectionIdentity": "Identity",
+  "formSectionAuthentication": "Authentication",
+  "formSectionAppearance": "Appearance",
+  "formSectionAdvanced": "Advanced",
+  "formPreviewA11yLabel": "Live card preview",
   "fieldAccount": "Account",
   "fieldAccountPlaceholder": "you@example.com",
   "fieldIssuer": "Issuer (optional)",
@@ -173,6 +181,8 @@
     "themeSystem": "System",
     "aboutApp": "App",
     "aboutVersion": "Version",
-    "premiumActive": "Premium is active"
+    "premiumActive": "Premium is active",
+    "premiumBannerTitle": "Unlock Premium features",
+    "premiumBannerSubtitle": "QR import, biometric app lock, and higher account limits."
   }
 }

@@ -2,14 +2,14 @@ import { memo, useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 const INITIALS_PALETTE = [
-  '#334155',
-  '#374151',
-  '#1f2937',
-  '#475569',
-  '#52525b',
-  '#0f766e',
-  '#1d4ed8',
-  '#7c3aed',
+  '#4F46E5',
+  '#7C3AED',
+  '#0891B2',
+  '#059669',
+  '#D97706',
+  '#DC2626',
+  '#BE185D',
+  '#0369A1',
 ] as const;
 
 type InitialsAvatarProps = {

@@ -8,6 +8,7 @@ import DraggableFlatList, { ScaleDecorator, type RenderItemParams } from 'react-
 import { useTheme } from '../../hooks/useTheme';
 import type { OtpEntry } from '../../types';
 import { isOtpListCardLocked } from '../../utils/premium-gating';
+import { TooltipHint } from '../ui/TooltipHint';
 import { OtpCard } from './OtpCard';
 
 const SWIPE_ACTION_WIDTH = 72;
@@ -24,6 +25,9 @@ type OtpListProps = {
   isDragEnabled?: boolean;
   /** Space for tab bar + FAB (default only suits FAB). */
   listBottomInset?: number;
+  /** Однократная подсказка над первой карточкой (свайп для действий). */
+  showSwipeCoachMark?: boolean;
+  onDismissSwipeCoachMark?: () => void;
 };
 
 export function OtpList({
@@ -37,6 +41,8 @@ export function OtpList({
   onReorderEntries,
   isDragEnabled = true,
   listBottomInset = 100,
+  showSwipeCoachMark = false,
+  onDismissSwipeCoachMark,
 }: OtpListProps) {
   const { t } = useTranslation();
   const { colors } = useTheme();
@@ -96,29 +102,38 @@ export function OtpList({
         );
       }
 
+      const coachAboveFirst =
+        index === 0 && showSwipeCoachMark && onDismissSwipeCoachMark ? (
+          <TooltipHint message={t('coachMarkSwipeHint')} onDismiss={onDismissSwipeCoachMark} />
+        ) : null;
+
       return (
         <ScaleDecorator activeScale={0.985}>
-          <Swipeable
-            containerStyle={styles.cardWrap}
-            friction={2}
-            overshootRight={false}
-            overshootFriction={8}
-            renderRightActions={renderRightActions(item)}
-          >
-            <View style={[styles.cardInner, isActive && styles.dragActiveCard]}>
-              <OtpCard
-                entry={item}
-                onLongPress={
-                  isDragEnabled
-                    ? () => {
-                        drag();
-                      }
-                    : undefined
-                }
-                secret={secret}
-              />
-            </View>
-          </Swipeable>
+          <View style={styles.swipeItemColumn}>
+            {coachAboveFirst}
+            <Swipeable
+              containerStyle={styles.cardWrap}
+              friction={2}
+              overshootRight={false}
+              overshootFriction={8}
+              renderRightActions={renderRightActions(item)}
+            >
+              <View style={[styles.cardInner, isActive && styles.dragActiveCard]}>
+                <OtpCard
+                  accessibilityHint={t('swipeableCardHint')}
+                  entry={item}
+                  onLongPress={
+                    isDragEnabled
+                      ? () => {
+                          drag();
+                        }
+                      : undefined
+                  }
+                  secret={secret}
+                />
+              </View>
+            </Swipeable>
+          </View>
         </ScaleDecorator>
       );
     },
@@ -130,9 +145,11 @@ export function OtpList({
       colors.textMuted,
       isDragEnabled,
       isPremium,
+      onDismissSwipeCoachMark,
       onLockedCardPress,
       renderRightActions,
       secretsById,
+      showSwipeCoachMark,
       t,
     ],
   );
@@ -164,6 +181,9 @@ export function OtpList({
 const styles = StyleSheet.create({
   listContent: {
     flexGrow: 1,
+  },
+  swipeItemColumn: {
+    gap: 0,
   },
   cardWrap: {
     position: 'relative',
