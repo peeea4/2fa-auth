@@ -1,10 +1,9 @@
-import { useEffect, useMemo, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { ImageOff } from "lucide-react-native";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   FlatList,
-  KeyboardAvoidingView,
   Modal,
-  Platform,
   Pressable,
   StyleSheet,
   Text,
@@ -12,13 +11,15 @@ import {
   View,
   useWindowDimensions,
   type ListRenderItemInfo,
-} from 'react-native';
-import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { SERVICE_REGISTRY, type ServiceIconEntry } from '../../constants/service-registry';
-import { useTheme } from '../../hooks/useTheme';
-import { ServiceIcon } from './ServiceIcon';
+import {
+  SERVICE_REGISTRY,
+  type ServiceIconEntry,
+} from "../../constants/service-registry";
+import { useKeyboardHeight, useTheme } from "../../hooks";
+import { ServiceIcon } from "./ServiceIcon";
 
 type IconPickerModalProps = {
   visible: boolean;
@@ -27,14 +28,13 @@ type IconPickerModalProps = {
   onClose: () => void;
 };
 
-type PickerItem =
-  {
-    key: string;
-    value: string;
-    label: string;
-    entry: ServiceIconEntry;
-    searchValue: string;
-  };
+type PickerItem = {
+  key: string;
+  value: string;
+  label: string;
+  entry: ServiceIconEntry;
+  searchValue: string;
+};
 
 const COLUMN_COUNT = 5;
 const SHEET_HORIZONTAL_PADDING = 20;
@@ -43,17 +43,24 @@ const GRID_ROW_GAP = 8;
 
 const normalizeQuery = (value: string): string => value.trim().toLowerCase();
 
-export function IconPickerModal({ visible, selectedKey, onSelect, onClose }: IconPickerModalProps) {
+export function IconPickerModal({
+  visible,
+  selectedKey,
+  onSelect,
+  onClose,
+}: IconPickerModalProps) {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
-  const [query, setQuery] = useState('');
-  const [debouncedQuery, setDebouncedQuery] = useState('');
-  const translateY = useSharedValue(420);
-  const overlayOpacity = useSharedValue(0);
-  const availableGridWidth = width - SHEET_HORIZONTAL_PADDING * 2 - GRID_COLUMN_GAP * (COLUMN_COUNT - 1);
-  const itemWidth = Math.floor(availableGridWidth / COLUMN_COUNT);
+  const keyboardHeight = useKeyboardHeight(visible);
+  const [query, setQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState("");
+  const inputRef = useRef<TextInput>(null);
+  const rowInnerWidth = width - SHEET_HORIZONTAL_PADDING * 2;
+  const gapTotal = GRID_COLUMN_GAP * (COLUMN_COUNT - 1);
+  const itemWidth =
+    (rowInnerWidth - GRID_COLUMN_GAP * (COLUMN_COUNT - 1)) / COLUMN_COUNT;
   const itemHeight = itemWidth + 12;
 
   useEffect(() => {
@@ -71,22 +78,23 @@ export function IconPickerModal({ visible, selectedKey, onSelect, onClose }: Ico
       return;
     }
 
-    setQuery('');
-    setDebouncedQuery('');
+    setQuery("");
+    setDebouncedQuery("");
   }, [visible]);
 
   useEffect(() => {
-    translateY.value = withTiming(visible ? 0 : 420, { duration: 220 });
-    overlayOpacity.value = withTiming(visible ? 1 : 0, { duration: 220 });
-  }, [overlayOpacity, translateY, visible]);
+    if (!visible) {
+      return;
+    }
 
-  const overlayStyle = useAnimatedStyle(() => ({
-    opacity: overlayOpacity.value * 0.35,
-  }));
+    const focusTimeoutId = setTimeout(() => {
+      inputRef.current?.focus();
+    }, 280);
 
-  const sheetStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: translateY.value }],
-  }));
+    return () => {
+      clearTimeout(focusTimeoutId);
+    };
+  }, [visible]);
 
   const items = useMemo<PickerItem[]>(() => {
     const normalizedQuery = normalizeQuery(debouncedQuery);
@@ -95,14 +103,16 @@ export function IconPickerModal({ visible, selectedKey, onSelect, onClose }: Ico
       value: entry.key,
       label: entry.label,
       entry,
-      searchValue: `${entry.label} ${entry.aliases.join(' ')}`.toLowerCase(),
+      searchValue: `${entry.label} ${entry.aliases.join(" ")}`.toLowerCase(),
     }));
 
     if (!normalizedQuery) {
       return serviceItems;
     }
 
-    return serviceItems.filter((item) => item.searchValue.includes(normalizedQuery));
+    return serviceItems.filter((item) =>
+      item.searchValue.includes(normalizedQuery),
+    );
   }, [debouncedQuery]);
 
   const renderItem = ({ item }: ListRenderItemInfo<PickerItem>) => {
@@ -119,11 +129,12 @@ export function IconPickerModal({ visible, selectedKey, onSelect, onClose }: Ico
         style={({ pressed }) => [
           styles.itemCell,
           {
-            borderColor: isSelected ? colors.primary : 'transparent',
-            backgroundColor: colors.background,
-            opacity: pressed ? 0.75 : 1,
             width: itemWidth,
             height: itemHeight,
+
+            borderColor: isSelected ? colors.primary : "transparent",
+            backgroundColor: colors.background,
+            opacity: pressed ? 0.75 : 1,
           },
         ]}
       >
@@ -134,97 +145,121 @@ export function IconPickerModal({ visible, selectedKey, onSelect, onClose }: Ico
                 id: `icon-picker-${item.entry.key}`,
                 issuer: item.entry.label,
                 account: item.entry.label,
-                algorithm: 'SHA1',
+                algorithm: "SHA1",
                 digits: 6,
                 period: 30,
                 createdAt: 0,
                 iconKey: item.entry.key,
-                iconSource: 'service',
+                iconSource: "service",
               }}
               size={30}
             />
           </View>
         </View>
-        <Text numberOfLines={1} style={[styles.itemLabel, { color: colors.text }]}>
-          {item.label}
-        </Text>
+        <View style={styles.itemLabelWrap}>
+          <Text
+            ellipsizeMode="tail"
+            numberOfLines={1}
+            style={[styles.itemLabel, { color: colors.text }]}
+          >
+            {item.label}
+          </Text>
+        </View>
       </Pressable>
     );
   };
 
   return (
-    <Modal animationType="none" transparent visible={visible} onRequestClose={onClose}>
+    <Modal
+      animationType="slide"
+      presentationStyle="overFullScreen"
+      transparent
+      visible={visible}
+      onRequestClose={onClose}
+    >
       <View style={styles.root}>
-        <Animated.View style={[styles.overlay, overlayStyle]}>
-          <Pressable style={styles.overlayPressable} onPress={onClose} />
-        </Animated.View>
-        <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          keyboardVerticalOffset={0}
-          style={styles.keyboardAvoiding}
+        <Pressable style={styles.overlayPressable} onPress={onClose} />
+        <View
+          style={[
+            styles.sheet,
+            {
+              backgroundColor: colors.surface,
+              paddingBottom: Math.max(insets.bottom, 16),
+            },
+          ]}
         >
-          <Animated.View
+          <Text style={[styles.title, { color: colors.text }]}>
+            {t("iconPickerTitle")}
+          </Text>
+          <TextInput
+            ref={inputRef}
+            autoCapitalize="none"
+            autoCorrect={false}
+            onChangeText={setQuery}
+            placeholder={t("iconPickerSearch")}
+            placeholderTextColor={colors.textMuted}
             style={[
-              styles.sheet,
-              sheetStyle,
+              styles.searchInput,
               {
-                backgroundColor: colors.surface,
-                paddingBottom: Math.max(insets.bottom, 16),
+                borderColor: colors.border,
+                color: colors.text,
+                backgroundColor: colors.background,
+              },
+            ]}
+            value={query}
+          />
+          <Pressable
+            accessibilityLabel={t("iconPickerNoIcon")}
+            accessibilityRole="button"
+            onPress={() => {
+              onSelect(null);
+              onClose();
+            }}
+            style={({ pressed }) => [
+              styles.noIconRow,
+              {
+                borderColor:
+                  selectedKey === null ? colors.primary : colors.border,
+                backgroundColor: colors.background,
+                opacity: pressed ? 0.75 : 1,
               },
             ]}
           >
-            <View style={[styles.handle, { backgroundColor: colors.border }]} />
-            <Text style={[styles.title, { color: colors.text }]}>{t('iconPickerTitle')}</Text>
-            <TextInput
-              autoCapitalize="none"
-              autoCorrect={false}
-              autoFocus
-              onChangeText={setQuery}
-              placeholder={t('iconPickerSearch')}
-              placeholderTextColor={colors.textMuted}
+            <View
               style={[
-                styles.searchInput,
-                { borderColor: colors.border, color: colors.text, backgroundColor: colors.background },
-              ]}
-              value={query}
-            />
-            <Pressable
-              accessibilityLabel={t('iconPickerNoIcon')}
-              accessibilityRole="button"
-              onPress={() => {
-                onSelect(null);
-                onClose();
-              }}
-              style={({ pressed }) => [
-                styles.noIconRow,
-                {
-                  borderColor: selectedKey === null ? colors.primary : colors.border,
-                  backgroundColor: colors.background,
-                  opacity: pressed ? 0.75 : 1,
-                },
+                styles.noIconIconBox,
+                { borderColor: colors.border, backgroundColor: colors.surface },
               ]}
             >
-              <View style={[styles.noIconWrap, { borderColor: colors.border, backgroundColor: colors.surface }]}>
-                <Text style={[styles.noIconGlyph, { color: colors.textMuted }]}>X</Text>
-              </View>
-              <Text style={[styles.noIconLabel, { color: colors.text }]}>{t('iconPickerNoIcon')}</Text>
-            </Pressable>
+              <ImageOff color={colors.textMuted} size={22} strokeWidth={2} />
+            </View>
+            <Text
+              numberOfLines={1}
+              style={[styles.noIconLabel, { color: colors.text, flex: 1 }]}
+            >
+              {t("iconPickerNoIcon")}
+            </Text>
+          </Pressable>
 
-            <FlatList
-              columnWrapperStyle={styles.row}
-              contentContainerStyle={styles.listContent}
-              data={items}
-              keyExtractor={(item) => item.key}
-              keyboardShouldPersistTaps="handled"
-              numColumns={COLUMN_COUNT}
-              renderItem={renderItem}
-              showsVerticalScrollIndicator={false}
-              ListEmptyComponent={
-                <Text style={[styles.emptyText, { color: colors.textMuted }]}>{t('iconPickerNoMatch')}</Text>
-              }
-            />
-          </Animated.View>
-        </KeyboardAvoidingView>
+          <FlatList
+            columnWrapperStyle={styles.row}
+            contentContainerStyle={[
+              styles.listContent,
+              { paddingBottom: keyboardHeight + 8 },
+            ]}
+            data={items}
+            keyExtractor={(item) => item.key}
+            keyboardShouldPersistTaps="handled"
+            numColumns={COLUMN_COUNT}
+            renderItem={renderItem}
+            showsVerticalScrollIndicator={false}
+            ListEmptyComponent={
+              <Text style={[styles.emptyText, { color: colors.textMuted }]}>
+                {t("iconPickerNoMatch")}
+              </Text>
+            }
+          />
+        </View>
       </View>
     </Modal>
   );
@@ -233,38 +268,25 @@ export function IconPickerModal({ visible, selectedKey, onSelect, onClose }: Ico
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    justifyContent: 'flex-end',
-  },
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: '#000000',
+    justifyContent: "flex-end",
   },
   overlayPressable: {
-    flex: 1,
-  },
-  keyboardAvoiding: {
-    flex: 1,
-    width: '100%',
-    justifyContent: 'flex-end',
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0, 0, 0, 0.35)",
   },
   sheet: {
-    maxHeight: '80%',
+    width: "100%",
+    maxHeight: "80%",
     borderTopLeftRadius: 22,
     borderTopRightRadius: 22,
     paddingHorizontal: SHEET_HORIZONTAL_PADDING,
-    paddingTop: 10,
-  },
-  handle: {
-    alignSelf: 'center',
-    width: 40,
-    height: 4,
-    borderRadius: 2,
-    marginBottom: 14,
+    paddingTop: 24,
   },
   title: {
     fontSize: 18,
-    fontWeight: '700',
+    fontWeight: "700",
     marginBottom: 12,
+    marginTop: 4,
   },
   searchInput: {
     borderWidth: 1,
@@ -276,67 +298,71 @@ const styles = StyleSheet.create({
   },
   listContent: {
     paddingBottom: 8,
-    rowGap: GRID_ROW_GAP,
   },
   row: {
-    columnGap: GRID_COLUMN_GAP,
+    justifyContent: "space-between",
+    marginBottom: GRID_ROW_GAP,
   },
   itemCell: {
     borderRadius: 12,
     borderWidth: 2,
     paddingVertical: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     gap: 4,
+    minWidth: 0,
+    overflow: "hidden",
   },
   iconContainer: {
-    width: '100%',
-    alignItems: 'center',
-    justifyContent: 'center',
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "center",
   },
   iconWrap: {
     width: 38,
     height: 38,
     borderRadius: 10,
     borderWidth: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   noIconRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 2,
     borderRadius: 12,
     paddingHorizontal: 12,
-    paddingVertical: 10,
+    paddingVertical: 12,
     marginBottom: 12,
-    gap: 10,
+    gap: 12,
   },
-  noIconWrap: {
-    width: 30,
-    height: 30,
-    borderRadius: 8,
+  noIconIconBox: {
+    width: 38,
+    height: 38,
+    borderRadius: 10,
     borderWidth: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  noIconGlyph: {
-    fontSize: 16,
-    fontWeight: '700',
+    alignItems: "center",
+    justifyContent: "center",
   },
   noIconLabel: {
-    fontSize: 14,
-    fontWeight: '600',
+    fontSize: 15,
+    fontWeight: "600",
+  },
+  itemLabelWrap: {
+    width: "100%",
+    minWidth: 0,
+    paddingHorizontal: 2,
+    alignItems: "center",
   },
   itemLabel: {
     fontSize: 10,
-    fontWeight: '500',
-    textAlign: 'center',
-    width: '90%',
+    fontWeight: "500",
+    textAlign: "center",
     lineHeight: 12,
+    width: "100%",
   },
   emptyText: {
-    textAlign: 'center',
+    textAlign: "center",
     paddingVertical: 20,
     fontSize: 14,
   },

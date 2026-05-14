@@ -1,7 +1,7 @@
 import { useFocusEffect } from '@react-navigation/native';
 import Constants from 'expo-constants';
 import { router } from 'expo-router';
-import { Check, Lock } from 'lucide-react-native';
+import { Check, ChevronRight, Lock, Sparkles } from 'lucide-react-native';
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, Platform, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
@@ -319,6 +319,36 @@ export default function SettingsScreen() {
             <Text style={[styles.rowValue, { color: colors.textMuted }]}>{appVersion}</Text>
           </View>
         </View>
+
+        {!premium.isPremium ? (
+          <Pressable
+            accessibilityHint={t('settingsScreen.premiumBannerSubtitle')}
+            accessibilityLabel={t('settingsScreen.premiumBannerTitle')}
+            accessibilityRole="button"
+            onPress={() => router.push('/paywall')}
+            style={({ pressed }) => [
+              styles.premiumBanner,
+              {
+                backgroundColor: colors.surface,
+                borderColor: colors.primary,
+                opacity: pressed ? 0.92 : 1,
+              },
+            ]}
+          >
+            <View style={[styles.premiumBannerIconWrap, { backgroundColor: `${colors.primary}22` }]}>
+              <Sparkles color={colors.primary} size={26} strokeWidth={2} />
+            </View>
+            <View style={styles.premiumBannerTextCol}>
+              <Text style={[styles.premiumBannerTitle, { color: colors.text }]}>
+                {t('settingsScreen.premiumBannerTitle')}
+              </Text>
+              <Text style={[styles.premiumBannerSubtitle, { color: colors.textMuted }]}>
+                {t('settingsScreen.premiumBannerSubtitle')}
+              </Text>
+            </View>
+            <ChevronRight color={colors.textMuted} size={22} strokeWidth={2.25} />
+          </Pressable>
+        ) : null}
       </ScrollView>
     </SafeAreaView>
   );
@@ -415,5 +445,34 @@ const styles = StyleSheet.create({
   },
   cardBody: {
     padding: 16,
+  },
+  premiumBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+    borderRadius: 14,
+    borderWidth: 1,
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+  },
+  premiumBannerIconWrap: {
+    width: 48,
+    height: 48,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  premiumBannerTextCol: {
+    flex: 1,
+    minWidth: 0,
+    gap: 4,
+  },
+  premiumBannerTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  premiumBannerSubtitle: {
+    fontSize: 13,
+    lineHeight: 18,
   },
 });

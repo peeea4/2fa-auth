@@ -6,46 +6,35 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Alert,
-  Platform,
   Pressable,
   StyleSheet,
   Text,
   TextInput,
   View,
 } from "react-native";
-import {
-  SafeAreaView,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import { OtpList } from "../../components/otp";
 import { Button } from "../../components/ui/Button";
 import { EmptyState } from "../../components/ui/EmptyState";
+import { useFirstRunHint } from "../../hooks/useFirstRunHint";
 import { usePremium } from "../../hooks/usePremium";
 import { useTheme } from "../../hooks/useTheme";
 import { storageService } from "../../services/storage.service";
 import { useOtpStore } from "../../stores";
 import type { OtpEntry } from "../../types";
 
-/** Тень «парящего» FAB: лёгкое свечение primary + глубина. */
-function fabIosShadow(primary: string) {
-  return {
-    shadowColor: primary,
-    shadowOffset: { width: 0, height: 12 } as const,
-    shadowOpacity: 0.42,
-    shadowRadius: 22,
-  };
-}
-
 export default function HomeScreen() {
   const { t, i18n } = useTranslation();
   const { colors } = useTheme();
-  const insets = useSafeAreaInsets();
   const tabBarHeight = useBottomTabBarHeight();
   const entries = useOtpStore((state) => state.entries);
   const removeEntry = useOtpStore((state) => state.removeEntry);
   const reorderEntries = useOtpStore((state) => state.reorderEntries);
   const { premium } = usePremium();
+  const { showHint: showSwipeCoachMark, dismissHint: dismissSwipeCoachMark } = useFirstRunHint(
+    entries.length === 1,
+  );
 
   const [search, setSearch] = useState("");
   const [secretsById, setSecretsById] = useState<Record<string, string | null>>(
@@ -80,13 +69,13 @@ export default function HomeScreen() {
           (e) =>
             e.issuer.toLowerCase().includes(q) ||
             e.account.toLowerCase().includes(q) ||
-            (e.group ?? '').toLowerCase().includes(q) ||
+            (e.group ?? "").toLowerCase().includes(q) ||
             e.id.toLowerCase().includes(q),
         );
 
     return [...filtered].sort((a, b) => {
-      const groupA = (a.group ?? '').trim().toLowerCase();
-      const groupB = (b.group ?? '').trim().toLowerCase();
+      const groupA = (a.group ?? "").trim().toLowerCase();
+      const groupB = (b.group ?? "").trim().toLowerCase();
       if (groupA !== groupB) {
         return groupA.localeCompare(groupB);
       }
@@ -134,9 +123,39 @@ export default function HomeScreen() {
     >
       <View style={styles.contentRoot}>
         <View style={styles.header}>
-          <Text style={[styles.title, { color: colors.text }]}>
-            {t("homeHeading")}
-          </Text>
+          <View style={styles.headerRow}>
+            <Text
+              numberOfLines={1}
+              style={[styles.title, { color: colors.text }]}
+            >
+              {t("homeHeading")}
+            </Text>
+            <Pressable
+              accessibilityLabel={t("add")}
+              accessibilityRole="button"
+              hitSlop={12}
+              onPress={() => router.push("/add")}
+              onPressIn={() => {
+                void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              }}
+              style={({ pressed }) => [
+                styles.headerAddButton,
+                {
+                  backgroundColor: colors.primary,
+                  borderColor: "rgba(255,255,255,0.55)",
+                  opacity: pressed ? 0.92 : 1,
+                  shadowColor: colors.primary,
+                  shadowOpacity: pressed ? 0.32 : 0.48,
+                  shadowRadius: pressed ? 8 : 12,
+                  shadowOffset: { width: 0, height: pressed ? 2 : 4 },
+                  elevation: pressed ? 3 : 6,
+                  transform: [{ scale: pressed ? 0.96 : 1 }],
+                },
+              ]}
+            >
+              <Plus color="#ffffff" size={24} strokeWidth={2.8} />
+            </Pressable>
+          </View>
           <TextInput
             accessibilityLabel={t("search")}
             autoCapitalize="none"
@@ -185,51 +204,17 @@ export default function HomeScreen() {
               grouped={hasGroups}
               isDragEnabled={isDragEnabled}
               isPremium={premium.isPremium}
-              listBottomInset={tabBarHeight + 100}
+              listBottomInset={tabBarHeight + 20}
               onDeleteEntry={confirmDeleteEntry}
+              onDismissSwipeCoachMark={dismissSwipeCoachMark}
               onEditEntry={handleEditEntry}
               onLockedCardPress={openPaywall}
               onReorderEntries={reorderEntries}
               secretsById={secretsById}
+              showSwipeCoachMark={showSwipeCoachMark}
             />
           )}
         </View>
-
-        {!!sortedFiltered.length && (
-          <View
-            collapsable={false}
-            style={[
-              styles.fabShell,
-              {
-                position: "absolute",
-                bottom: 18 + insets.bottom,
-                right: 16 + insets.right,
-                zIndex: 20,
-                backgroundColor: colors.primary,
-                borderWidth: 1,
-                borderColor: "rgba(255,255,255,0.32)",
-                ...(Platform.OS === "ios" ? fabIosShadow(colors.primary) : {}),
-              },
-            ]}
-          >
-            <Pressable
-              accessibilityLabel={t("add")}
-              accessibilityRole="button"
-              onPress={() => router.push("/add")}
-              onPressIn={() => {
-                void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              }}
-              style={({ pressed }) => [
-                pressed && {
-                  opacity: 0.92,
-                  transform: [{ scale: 0.94 }, { translateY: 1 }],
-                },
-              ]}
-            >
-              <Plus color="#ffffff" size={44} />
-            </Pressable>
-          </View>
-        )}
       </View>
     </SafeAreaView>
   );
@@ -247,9 +232,24 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
     gap: 12,
   },
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 12,
+  },
   title: {
+    flex: 1,
     fontSize: 28,
     fontWeight: "700",
+  },
+  headerAddButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    borderWidth: 1,
+    alignItems: "center",
+    justifyContent: "center",
   },
   search: {
     minHeight: 44,
@@ -261,18 +261,5 @@ const styles = StyleSheet.create({
   body: {
     flex: 1,
     paddingHorizontal: 20,
-  },
-  fabShell: {
-    borderRadius: 32,
-    overflow: "visible",
-    padding: 6,
-  },
-  fabHit: {
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  fabIconCenter: {
-    alignItems: "center",
-    justifyContent: "center",
   },
 });

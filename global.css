@@ -10,6 +10,7 @@
   :root {
     --color-background: 248 250 252;
     --color-surface: 255 255 255;
+    --color-surface2: 241 245 249;
     --color-foreground: 15 23 42;
     --color-muted: 71 85 105;
     --color-border: 226 232 240;
@@ -21,15 +22,16 @@
   }
 
   .dark {
-    --color-background: 2 6 23;
-    --color-surface: 15 23 42;
-    --color-foreground: 248 250 252;
-    --color-muted: 148 163 184;
-    --color-border: 30 41 59;
-    --color-primary: 96 165 250;
-    --color-success: 74 222 128;
+    --color-background: 12 12 20;
+    --color-surface: 20 20 33;
+    --color-surface2: 28 28 46;
+    --color-foreground: 237 237 245;
+    --color-muted: 120 120 160;
+    --color-border: 38 38 58;
+    --color-primary: 124 111 247;
+    --color-success: 52 211 153;
     --color-warning: 251 191 36;
     --color-danger: 248 113 113;
-    --color-ring: 96 165 250;
+    --color-ring: 124 111 247;
   }
 }

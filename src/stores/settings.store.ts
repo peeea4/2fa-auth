@@ -12,6 +12,8 @@ export type SettingsState = {
   theme: AppTheme;
   language: string;
   isOnboardingCompleted: boolean;
+  /** Однократная подсказка «свайп для действий» на главном списке уже была показана/снята. */
+  hasSeenSwipeCoachMark: boolean;
   /** Только в `__DEV__`: в продакшене игнорируется в логике Premium. */
   devPremiumOverride: boolean;
 };
@@ -20,6 +22,7 @@ type SettingsActions = {
   setTheme: (theme: AppTheme) => void;
   setLanguage: (language: string) => void;
   setOnboardingCompleted: (isCompleted: boolean) => void;
+  setSwipeCoachMarkSeen: (seen: boolean) => void;
   setDevPremiumOverride: (value: boolean) => void;
   resetSettings: () => void;
 };
@@ -30,6 +33,7 @@ const initialState: SettingsState = {
   theme: 'system',
   language: resolveAppLanguage(),
   isOnboardingCompleted: false,
+  hasSeenSwipeCoachMark: false,
   devPremiumOverride: false,
 };
 
@@ -47,6 +51,9 @@ export const useSettingsStore = create<SettingsStore>()(
       setOnboardingCompleted: (isCompleted) => {
         set({ isOnboardingCompleted: isCompleted });
       },
+      setSwipeCoachMarkSeen: (seen) => {
+        set({ hasSeenSwipeCoachMark: seen });
+      },
       setDevPremiumOverride: (value) => {
         set({ devPremiumOverride: value });
       },
@@ -62,6 +69,7 @@ export const useSettingsStore = create<SettingsStore>()(
         theme: state.theme,
         language: state.language,
         isOnboardingCompleted: state.isOnboardingCompleted,
+        hasSeenSwipeCoachMark: state.hasSeenSwipeCoachMark,
         devPremiumOverride: state.devPremiumOverride,
       }),
       merge: (persistedState, currentState) => {

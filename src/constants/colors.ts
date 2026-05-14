@@ -15,6 +15,7 @@ export type AppTheme = ThemePreference;
 export type SemanticColors = {
   background: string;
   surface: string;
+  surface2: string;
   text: string;
   textMuted: string;
   border: string;
@@ -30,6 +31,7 @@ export const colors: Record<ResolvedTheme, SemanticColors> = {
   light: {
     background: '#F8FAFC',
     surface: '#FFFFFF',
+    surface2: '#F1F5F9',
     text: '#0F172A',
     textMuted: '#475569',
     border: '#E2E8F0',
@@ -40,16 +42,17 @@ export const colors: Record<ResolvedTheme, SemanticColors> = {
     ring: '#2563EB',
   },
   dark: {
-    background: '#020617',
-    surface: '#0F172A',
-    text: '#F8FAFC',
-    textMuted: '#94A3B8',
-    border: '#1E293B',
-    primary: '#60A5FA',
-    success: '#4ADE80',
+    background: '#0C0C14',
+    surface: '#141421',
+    surface2: '#1C1C2E',
+    text: '#EDEDF5',
+    textMuted: '#7878A0',
+    border: '#26263A',
+    primary: '#7C6FF7',
+    success: '#34D399',
     warning: '#FBBF24',
     danger: '#F87171',
-    ring: '#60A5FA',
+    ring: '#7C6FF7',
   },
 };
 
@@ -61,6 +64,7 @@ export const themeRgbChannels: Record<ResolvedTheme, Record<keyof SemanticColors
   light: {
     background: '248 250 252',
     surface: '255 255 255',
+    surface2: '241 245 249',
     text: '15 23 42',
     textMuted: '71 85 105',
     border: '226 232 240',
@@ -71,16 +75,17 @@ export const themeRgbChannels: Record<ResolvedTheme, Record<keyof SemanticColors
     ring: '37 99 235',
   },
   dark: {
-    background: '2 6 23',
-    surface: '15 23 42',
-    text: '248 250 252',
-    textMuted: '148 163 184',
-    border: '30 41 59',
-    primary: '96 165 250',
-    success: '74 222 128',
+    background: '12 12 20',
+    surface: '20 20 33',
+    surface2: '28 28 46',
+    text: '237 237 245',
+    textMuted: '120 120 160',
+    border: '38 38 58',
+    primary: '124 111 247',
+    success: '52 211 153',
     warning: '251 191 36',
     danger: '248 113 113',
-    ring: '96 165 250',
+    ring: '124 111 247',
   },
 };
 

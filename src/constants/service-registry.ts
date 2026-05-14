@@ -1,11 +1,5 @@
 import * as simpleIcons from 'simple-icons';
-
-type SimpleIcon = {
-  title: string;
-  slug: string;
-  hex: string;
-  path: string;
-};
+import type { SimpleIcon } from 'simple-icons';
 
 export type ServiceIconEntry = {
   key: string;
