@@ -38,21 +38,26 @@ export function CollapsibleSection({ title, expanded, onToggle, children }: Coll
         accessibilityState={{ expanded }}
         hitSlop={8}
         onPress={handlePress}
-        style={({ pressed }) => [styles.header, pressed && styles.headerPressed]}
+        style={({ pressed }) => [styles.headerPressable, pressed && styles.headerPressed]}
       >
-        <Text
-          ellipsizeMode="tail"
-          numberOfLines={1}
-          style={[styles.title, { color: colors.text }]}
-        >
-          {title}
-        </Text>
-        <ChevronDown
-          color={colors.textMuted}
-          size={22}
-          strokeWidth={2.2}
-          style={{ transform: [{ rotate: expanded ? '180deg' : '0deg' }] }}
-        />
+        <View style={styles.headerRow}>
+          <Text
+            ellipsizeMode="tail"
+            numberOfLines={1}
+            style={[styles.title, { color: colors.text }]}
+            {...(Platform.OS === 'android' ? { includeFontPadding: false } : {})}
+          >
+            {title}
+          </Text>
+          <View
+            style={[
+              styles.chevronWrap,
+              { transform: [{ rotate: expanded ? '180deg' : '0deg' }] },
+            ]}
+          >
+            <ChevronDown color={colors.textMuted} size={24} strokeWidth={2} />
+          </View>
+        </View>
       </Pressable>
       {expanded ? <View style={styles.body}>{children}</View> : null}
     </View>
@@ -62,21 +67,32 @@ export function CollapsibleSection({ title, expanded, onToggle, children }: Coll
 const styles = StyleSheet.create({
   outer: {
     gap: 12,
+    alignSelf: 'stretch',
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 12,
+  headerPressable: {
+    alignSelf: 'stretch',
     paddingVertical: 4,
   },
   headerPressed: {
     opacity: 0.72,
   },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'stretch',
+    gap: 8,
+  },
   title: {
-    flex: 1,
+    flexShrink: 1,
     fontSize: 15,
     fontWeight: '600',
+  },
+  chevronWrap: {
+    width: 24,
+    height: 24,
+    flexShrink: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   body: {
     gap: 12,

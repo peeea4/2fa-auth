@@ -1,5 +1,4 @@
-import * as simpleIcons from 'simple-icons';
-import type { SimpleIcon } from 'simple-icons';
+import { CURATED_ICON_BY_SLUG } from './service-registry.icons';
 
 export type ServiceIconEntry = {
   key: string;
@@ -8,18 +7,6 @@ export type ServiceIconEntry = {
   svgPath: string;
   aliases: string[];
 };
-
-const SIMPLE_ICON_LIST = Object.values(simpleIcons).filter(
-  (icon): icon is SimpleIcon =>
-    Boolean(icon) &&
-    typeof icon === 'object' &&
-    'slug' in icon &&
-    'title' in icon &&
-    'hex' in icon &&
-    'path' in icon,
-);
-
-const SIMPLE_ICON_BY_SLUG = new Map(SIMPLE_ICON_LIST.map((icon) => [icon.slug, icon]));
 
 const CURATED_SERVICE_KEYS = [
   'google',
@@ -216,7 +203,7 @@ const EXTRA_ALIASES: Record<string, string[]> = {
 };
 
 export const SERVICE_REGISTRY: ServiceIconEntry[] = CURATED_SERVICE_KEYS.flatMap((key) => {
-  const icon = SIMPLE_ICON_BY_SLUG.get(key);
+  const icon = CURATED_ICON_BY_SLUG[key];
   if (!icon) {
     return [];
   }

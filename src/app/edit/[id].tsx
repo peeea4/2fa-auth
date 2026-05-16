@@ -13,10 +13,10 @@ import {
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { IconPickerModal } from '../../components/icons/IconPickerModal';
-import { ServiceIcon } from '../../components/icons/ServiceIcon';
 import { OtpCardPreview } from '../../components/otp/OtpCardPreview';
 import { Button } from '../../components/ui/Button';
 import { CollapsibleSection } from '../../components/ui/CollapsibleSection';
+import { IconFieldRow } from '../../components/ui/IconFieldRow';
 import { Input } from '../../components/ui/Input';
 import { SectionHeader } from '../../components/ui/SectionHeader';
 import { REGISTRY_BY_KEY } from '../../constants/service-registry';
@@ -270,29 +270,11 @@ export default function EditOtpScreen() {
           />
 
           <SectionHeader title={t('formSectionAppearance')} />
-          <Text style={[styles.groupLabel, { color: colors.text }]}>{t('fieldIcon')}</Text>
-          <View style={styles.iconRow}>
-            <Pressable
-              accessibilityLabel={t('changeIcon')}
-              accessibilityRole="button"
-              onPress={() => setIsPickerVisible(true)}
-              style={[
-                styles.iconPreviewWrap,
-                { borderColor: colors.border, backgroundColor: colors.surface },
-              ]}
-            >
-              <ServiceIcon entry={iconPreviewEntry} size={64} />
-            </Pressable>
-            <View style={styles.iconRowAction}>
-              <Button
-                fullWidth={false}
-                onPress={() => setIsPickerVisible(true)}
-                size="md"
-                title={t('changeIcon')}
-                variant="secondary"
-              />
-            </View>
-          </View>
+          <IconFieldRow
+            entry={iconPreviewEntry}
+            label={t('fieldIcon')}
+            onPress={() => setIsPickerVisible(true)}
+          />
 
           <CollapsibleSection
             expanded={advancedExpanded}
@@ -434,22 +416,6 @@ const styles = StyleSheet.create({
   segmentText: {
     fontSize: 15,
     fontWeight: '600',
-  },
-  iconRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  iconPreviewWrap: {
-    width: 80,
-    height: 80,
-    borderRadius: 18,
-    borderWidth: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  iconRowAction: {
-    flexShrink: 1,
   },
   saveError: {
     fontSize: 15,

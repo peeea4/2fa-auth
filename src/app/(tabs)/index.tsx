@@ -17,6 +17,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { OtpList } from "../../components/otp";
 import { Button } from "../../components/ui/Button";
 import { EmptyState } from "../../components/ui/EmptyState";
+import { EmptyStateHero } from "../../components/ui/EmptyStateHero";
 import { useFirstRunHint } from "../../hooks/useFirstRunHint";
 import { usePremium } from "../../hooks/usePremium";
 import { useTheme } from "../../hooks/useTheme";
@@ -178,26 +179,24 @@ export default function HomeScreen() {
 
         <View style={styles.body}>
           {sortedFiltered.length === 0 ? (
-            <EmptyState
-              action={
-                <Button
-                  leftIcon={
-                    <Plus color="#ffffff" size={20} strokeWidth={2.5} />
-                  }
-                  onPress={() => router.push("/add")}
-                  size="lg"
-                  title={t("add")}
-                />
-              }
-              description={
-                entries.length === 0
-                  ? t("emptySubtitle")
-                  : t("emptySearchSubtitle")
-              }
-              title={
-                entries.length === 0 ? t("emptyTitle") : t("emptySearchTitle")
-              }
-            />
+            entries.length === 0 ? (
+              <EmptyStateHero />
+            ) : (
+              <EmptyState
+                action={
+                  <Button
+                    leftIcon={
+                      <Plus color="#ffffff" size={20} strokeWidth={2.5} />
+                    }
+                    onPress={() => router.push("/add")}
+                    size="lg"
+                    title={t("add")}
+                  />
+                }
+                description={t("emptySearchSubtitle")}
+                title={t("emptySearchTitle")}
+              />
+            )
           ) : (
             <OtpList
               entries={sortedFiltered}

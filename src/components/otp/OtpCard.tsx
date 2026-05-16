@@ -1,8 +1,10 @@
+import * as Clipboard from 'expo-clipboard';
 import * as Haptics from 'expo-haptics';
 import { Copy } from 'lucide-react-native';
 import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Platform, Pressable, StyleSheet, Text, ToastAndroid, View } from 'react-native';
+import { BorderlessButton } from 'react-native-gesture-handler';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -15,7 +17,6 @@ import { useOtpTimer } from '../../hooks/useOtpTimer';
 import { useTheme } from '../../hooks/useTheme';
 import { otpService } from '../../services/otp.service';
 import type { OtpDigits, OtpEntry } from '../../types';
-import { copyTextToClipboard } from '../../utils/copy-to-clipboard';
 import { ServiceIcon } from '../icons/ServiceIcon';
 import { CountdownBar } from './CountdownBar';
 
@@ -39,6 +40,7 @@ export function OtpCard({ entry, secret, onLongPress, accessibilityHint: cardAcc
   const { colors } = useTheme();
   const { timeLeft, currentSlot } = useOtpTimer({ period: 30 });
   const copiedOpacity = useSharedValue(0);
+  const copyScale = useSharedValue(1);
 
   const code = useMemo(() => {
     // Recompute TOTP when the active time slot changes.
@@ -68,6 +70,10 @@ export function OtpCard({ entry, secret, onLongPress, accessibilityHint: cardAcc
     opacity: copiedOpacity.value,
   }));
 
+  const copyButtonStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: copyScale.value }],
+  }));
+
   const showCopiedFeedback = useCallback(() => {
     copiedOpacity.value = withSequence(
       withTiming(1, { duration: 120 }),
@@ -75,23 +81,38 @@ export function OtpCard({ entry, secret, onLongPress, accessibilityHint: cardAcc
     );
   }, [copiedOpacity]);
 
-  const handleCopy = useCallback(async () => {
+  const handleCopyPressIn = useCallback(() => {
+    if (!secret) {
+      return;
+    }
+    void Haptics.selectionAsync();
+    copyScale.value = withTiming(0.94, { duration: 80 });
+  }, [copyScale, secret]);
+
+  const handleCopyPressOut = useCallback(() => {
+    copyScale.value = withTiming(1, { duration: 120 });
+  }, [copyScale]);
+
+  const handleCopy = useCallback(() => {
     if (!secret) {
       return;
     }
 
-    const copied = await copyTextToClipboard(code);
-    if (!copied) {
-      return;
-    }
-
-    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
     if (Platform.OS === 'android') {
       ToastAndroid.show(t('copied'), ToastAndroid.SHORT);
     } else {
       showCopiedFeedback();
     }
-  }, [code, secret, showCopiedFeedback, t]);
+
+    void Clipboard.setStringAsync(code)
+      .then(() => {
+        void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      })
+      .catch(() => {
+        copiedOpacity.value = withTiming(0, { duration: 120 });
+      });
+  }, [code, copiedOpacity, secret, showCopiedFeedback, t]);
 
   return (
     <View
@@ -106,7 +127,7 @@ export function OtpCard({ entry, secret, onLongPress, accessibilityHint: cardAcc
       <Pressable
         accessibilityHint={cardAccessibilityHint}
         accessibilityRole="button"
-        delayLongPress={180}
+        delayLongPress={260}
         onLongPress={onLongPress}
         style={({ pressed }) => [styles.cardPressable, pressed && styles.cardPressed]}
       >
@@ -124,26 +145,29 @@ export function OtpCard({ entry, secret, onLongPress, accessibilityHint: cardAcc
                   {entry.account}
                 </Text>
               </View>
-              <Pressable
-                accessibilityHint={t('otpCard.copyHint')}
-                accessibilityLabel={t('otpCard.copyLabel')}
-                accessibilityRole="button"
-                disabled={!secret}
-                hitSlop={8}
-                onPress={() => {
-                  void handleCopy();
-                }}
-                style={({ pressed }) => [
+              <Animated.View
+                style={[
                   styles.copyButton,
+                  copyButtonStyle,
                   {
                     borderColor: colors.border,
                     backgroundColor: colors.background,
-                    opacity: !secret ? 0.5 : pressed ? 0.78 : 1,
+                    opacity: !secret ? 0.5 : 1,
                   },
                 ]}
               >
-                <Copy color={colors.text} size={16} strokeWidth={2.2} />
-              </Pressable>
+                <BorderlessButton
+                  accessibilityHint={t('otpCard.copyHint')}
+                  accessibilityLabel={t('otpCard.copyLabel')}
+                  accessibilityRole="button"
+                  enabled={!!secret}
+                  hitSlop={8}
+                  onPress={handleCopy}
+                  style={styles.copyButtonInner}
+                >
+                  <Copy color={colors.text} size={16} strokeWidth={2.2} />
+                </BorderlessButton>
+              </Animated.View>
             </View>
           </View>
 
@@ -224,6 +248,10 @@ const styles = StyleSheet.create({
     height: 32,
     borderRadius: 10,
     borderWidth: 1,
+    overflow: 'hidden',
+  },
+  copyButtonInner: {
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },

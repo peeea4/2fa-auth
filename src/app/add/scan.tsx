@@ -1,5 +1,5 @@
 import * as Crypto from 'expo-crypto';
-import { CameraView, useCameraPermissions } from 'expo-camera';
+import { CameraView, useCameraPermissions, type BarcodeScanningResult } from 'expo-camera';
 import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -15,6 +15,13 @@ import {
   Text,
   View,
 } from 'react-native';
+import Animated, {
+  interpolateColor,
+  useAnimatedStyle,
+  useSharedValue,
+  withSequence,
+  withTiming,
+} from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button } from '../../components/ui/Button';
@@ -35,6 +42,118 @@ function createEntryId(): string {
 
 const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get('window');
 
+const CUTOUT_TOLERANCE_PX = 6;
+const MIN_BBOX_OVERLAP_RATIO = 0.7;
+
+type CutoutLayout = {
+  cutoutTop: number;
+  cutoutSize: number;
+  cutoutLeft: number;
+  header: number;
+};
+
+type BarcodeRect = {
+  left: number;
+  top: number;
+  right: number;
+  bottom: number;
+  area: number;
+  centerX: number;
+  centerY: number;
+};
+
+function rectFromCornerPoints(points: { x: number; y: number }[]): BarcodeRect | null {
+  if (!points.length) {
+    return null;
+  }
+  let minX = points[0].x;
+  let maxX = points[0].x;
+  let minY = points[0].y;
+  let maxY = points[0].y;
+  for (let i = 1; i < points.length; i += 1) {
+    const { x, y } = points[i];
+    minX = Math.min(minX, x);
+    maxX = Math.max(maxX, x);
+    minY = Math.min(minY, y);
+    maxY = Math.max(maxY, y);
+  }
+  const width = maxX - minX;
+  const height = maxY - minY;
+  if (width <= 0 || height <= 0) {
+    return null;
+  }
+  return {
+    left: minX,
+    top: minY,
+    right: maxX,
+    bottom: maxY,
+    area: width * height,
+    centerX: (minX + maxX) / 2,
+    centerY: (minY + maxY) / 2,
+  };
+}
+
+function rectFromBounds(bounds: BarcodeScanningResult['bounds']): BarcodeRect | null {
+  const w = bounds.size?.width ?? 0;
+  const h = bounds.size?.height ?? 0;
+  if (w <= 0 || h <= 0) {
+    return null;
+  }
+  const left = bounds.origin.x;
+  const top = bounds.origin.y;
+  return {
+    left,
+    top,
+    right: left + w,
+    bottom: top + h,
+    area: w * h,
+    centerX: left + w / 2,
+    centerY: top + h / 2,
+  };
+}
+
+function getBarcodeRect(result: BarcodeScanningResult): BarcodeRect | null {
+  const fromCorners = result.cornerPoints?.length ? rectFromCornerPoints(result.cornerPoints) : null;
+  if (fromCorners) {
+    return fromCorners;
+  }
+  return rectFromBounds(result.bounds);
+}
+
+function intersectionArea(a: BarcodeRect, cut: CutoutLayout): number {
+  const cutL = cut.cutoutLeft;
+  const cutT = cut.cutoutTop;
+  const cutR = cut.cutoutLeft + cut.cutoutSize;
+  const cutB = cut.cutoutTop + cut.cutoutSize;
+  const ix0 = Math.max(a.left, cutL);
+  const iy0 = Math.max(a.top, cutT);
+  const ix1 = Math.min(a.right, cutR);
+  const iy1 = Math.min(a.bottom, cutB);
+  if (ix1 <= ix0 || iy1 <= iy0) {
+    return 0;
+  }
+  return (ix1 - ix0) * (iy1 - iy0);
+}
+
+/** Center inside cutout (± tolerance); ≥70% of barcode bbox area overlaps strict cutout. */
+function isInsideCutout(result: BarcodeScanningResult, cut: CutoutLayout): boolean {
+  const rect = getBarcodeRect(result);
+  if (!rect || rect.area <= 0) {
+    return true;
+  }
+  const tol = CUTOUT_TOLERANCE_PX;
+  const cxOk =
+    rect.centerX >= cut.cutoutLeft - tol &&
+    rect.centerX <= cut.cutoutLeft + cut.cutoutSize + tol &&
+    rect.centerY >= cut.cutoutTop - tol &&
+    rect.centerY <= cut.cutoutTop + cut.cutoutSize + tol;
+  if (!cxOk) {
+    return false;
+  }
+  const overlap = intersectionArea(rect, cut);
+  return overlap / rect.area >= MIN_BBOX_OVERLAP_RATIO;
+}
+
 export default function ScanQrScreen() {
   const { t } = useTranslation();
   const { colors, isDark } = useTheme();
@@ -53,6 +172,24 @@ export default function ScanQrScreen() {
     const cutoutLeft = (SCREEN_W - cutoutSize) / 2;
     return { cutoutTop, cutoutSize, cutoutLeft, header };
   }, [insets.top]);
+
+  const frameAccent = useSharedValue(0);
+  const warningColorShared = useSharedValue(colors.warning);
+
+  useEffect(() => {
+    warningColorShared.value = colors.warning;
+  }, [colors.warning, warningColorShared]);
+
+  const pulseFrameOutOfBounds = useCallback(() => {
+    frameAccent.value = withSequence(
+      withTiming(1, { duration: 100 }),
+      withTiming(0, { duration: 100 }),
+    );
+  }, [frameAccent]);
+
+  const frameAnimatedStyle = useAnimatedStyle(() => ({
+    borderColor: interpolateColor(frameAccent.value, [0, 1], [FRAME, warningColorShared.value]),
+  }));
 
   useEffect(() => {
     void syncSubscriptionStatus();
@@ -98,12 +235,17 @@ export default function ScanQrScreen() {
   );
 
   const onBarcodeScanned = useCallback(
-    ({ data }: { data: string }) => {
+    (result: BarcodeScanningResult) => {
       if (handledRef.current) {
         return;
       }
 
-      const raw = data.trim();
+      if (!isInsideCutout(result, cutoutLayout)) {
+        pulseFrameOutOfBounds();
+        return;
+      }
+
+      const raw = result.data.trim();
       if (!raw.toLowerCase().startsWith('otpauth://')) {
         return;
       }
@@ -130,7 +272,7 @@ export default function ScanQrScreen() {
         setScanError(t('scanInvalidQr'));
       }
     },
-    [canAddCode, persistParsed, t],
+    [canAddCode, cutoutLayout, persistParsed, pulseFrameOutOfBounds, t],
   );
 
   if (!canScanQr) {
@@ -196,7 +338,7 @@ export default function ScanQrScreen() {
         <View style={{ flex: 1, backgroundColor: OVERLAY }} />
       </View>
 
-      <View
+      <Animated.View
         pointerEvents="none"
         style={[
           styles.cutoutFrame,
@@ -205,8 +347,8 @@ export default function ScanQrScreen() {
             left: cutoutLeft,
             width: cutoutSize,
             height: cutoutSize,
-            borderColor: FRAME,
           },
+          frameAnimatedStyle,
         ]}
       />
 

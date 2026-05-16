@@ -58,7 +58,6 @@ export function IconPickerModal({
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const inputRef = useRef<TextInput>(null);
   const rowInnerWidth = width - SHEET_HORIZONTAL_PADDING * 2;
-  const gapTotal = GRID_COLUMN_GAP * (COLUMN_COUNT - 1);
   const itemWidth =
     (rowInnerWidth - GRID_COLUMN_GAP * (COLUMN_COUNT - 1)) / COLUMN_COUNT;
   const itemHeight = itemWidth + 12;
@@ -126,17 +125,17 @@ export function IconPickerModal({
           onSelect(item.value);
           onClose();
         }}
-        style={({ pressed }) => [
-          styles.itemCell,
-          {
-            width: itemWidth,
-            height: itemHeight,
+        // style={({ pressed }) => [
+          // styles.itemCell,
+          // {
+            // width: itemWidth,
+            // height: itemHeight,
 
-            borderColor: isSelected ? colors.primary : "transparent",
-            backgroundColor: colors.background,
-            opacity: pressed ? 0.75 : 1,
-          },
-        ]}
+            // borderColor: isSelected ? colors.primary : "transparent",
+            // backgroundColor: colors.background,
+            // opacity: pressed ? 0.75 : 1,
+          // },
+        // ]}
       >
         <View style={styles.iconContainer}>
           <View style={styles.iconWrap}>
@@ -156,6 +155,7 @@ export function IconPickerModal({
             />
           </View>
         </View>
+        {/*
         <View style={styles.itemLabelWrap}>
           <Text
             ellipsizeMode="tail"
@@ -165,6 +165,7 @@ export function IconPickerModal({
             {item.label}
           </Text>
         </View>
+        */}
       </Pressable>
     );
   };
@@ -242,11 +243,11 @@ export function IconPickerModal({
           </Pressable>
 
           <FlatList
-            columnWrapperStyle={styles.row}
-            contentContainerStyle={[
-              styles.listContent,
-              { paddingBottom: keyboardHeight + 8 },
-            ]}
+            // columnWrapperStyle={styles.row}
+            // contentContainerStyle={[
+              // styles.listContent,
+              // { paddingBottom: keyboardHeight + 8 },
+            // ]}
             data={items}
             keyExtractor={(item) => item.key}
             keyboardShouldPersistTaps="handled"
@@ -300,7 +301,9 @@ const styles = StyleSheet.create({
     paddingBottom: 8,
   },
   row: {
-    justifyContent: "space-between",
+    flexDirection: "row",
+    width: "100%",
+    gap: GRID_COLUMN_GAP,
     marginBottom: GRID_ROW_GAP,
   },
   itemCell: {
@@ -321,8 +324,6 @@ const styles = StyleSheet.create({
   iconWrap: {
     width: 38,
     height: 38,
-    borderRadius: 10,
-    borderWidth: 1,
     alignItems: "center",
     justifyContent: "center",
   },
