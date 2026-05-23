@@ -2,7 +2,7 @@ import type { LucideIcon } from 'lucide-react-native';
 import { Copy, GripVertical, QrCode, ShieldCheck } from 'lucide-react-native';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import Animated, {
   Extrapolation,
   interpolate,
@@ -136,10 +136,9 @@ function SlidePanel({
 
 type OnboardingSliderProps = {
   onComplete: () => void;
-  onAddFirstAccount: () => void;
 };
 
-export function OnboardingSlider({ onComplete, onAddFirstAccount }: OnboardingSliderProps) {
+export function OnboardingSlider({ onComplete }: OnboardingSliderProps) {
   const { width: slideWidth } = useWindowDimensions();
   const { t } = useTranslation();
   const { colors } = useTheme();
@@ -202,17 +201,6 @@ export function OnboardingSlider({ onComplete, onAddFirstAccount }: OnboardingSl
 
   return (
     <View style={[styles.root, { backgroundColor: colors.background }]}>
-      <View style={styles.topBar}>
-        <Pressable
-          accessibilityRole="button"
-          hitSlop={12}
-          onPress={onComplete}
-          style={({ pressed }) => [styles.skip, { opacity: pressed ? 0.6 : 1 }]}
-        >
-          <Text style={[styles.skipLabel, { color: colors.textMuted }]}>{t('onboarding.skip')}</Text>
-        </Pressable>
-      </View>
-
       <Animated.ScrollView
         contentContainerStyle={styles.scrollContent}
         decelerationRate="fast"
@@ -240,9 +228,6 @@ export function OnboardingSlider({ onComplete, onAddFirstAccount }: OnboardingSl
           title={activeIndex >= lastIndex ? t('onboarding.getStarted') : t('onboarding.next')}
           variant="primary"
         />
-        {activeIndex >= lastIndex ? (
-          <Button onPress={onAddFirstAccount} size="lg" title={t('onboarding.addFirstAccount')} variant="secondary" />
-        ) : null}
       </View>
     </View>
   );
@@ -251,21 +236,6 @@ export function OnboardingSlider({ onComplete, onAddFirstAccount }: OnboardingSl
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-  },
-  topBar: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    paddingHorizontal: 20,
-    paddingTop: 8,
-    paddingBottom: 4,
-  },
-  skip: {
-    paddingVertical: 8,
-    paddingHorizontal: 4,
-  },
-  skipLabel: {
-    fontSize: 16,
-    fontWeight: '600',
   },
   scrollContent: {
     alignItems: 'stretch',

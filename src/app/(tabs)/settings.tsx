@@ -189,12 +189,49 @@ export default function SettingsScreen() {
         <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           {premium.isPremium ? (
             <View style={styles.row}>
-              <Text style={[styles.rowLabel, { color: colors.text }]}>{t('settingsScreen.premiumActive')}</Text>
+              <View style={[styles.premiumActiveIconWrap, { backgroundColor: `${colors.primary}22` }]}>
+                <Sparkles color={colors.primary} size={22} strokeWidth={2} />
+              </View>
+              <View style={styles.rowMain}>
+                <Text style={[styles.rowLabel, { color: colors.text }]}>{t('settingsScreen.premiumActive')}</Text>
+              </View>
             </View>
           ) : (
-            <View style={styles.cardBody}>
-              <Button onPress={() => router.push('/paywall')} title={t('upgrade')} variant="primary" />
-            </View>
+            <>
+              <Pressable
+                accessibilityHint={t('settingsScreen.premiumBannerSubtitle')}
+                accessibilityLabel={t('settingsScreen.premiumBannerTitle')}
+                accessibilityRole="button"
+                hitSlop={8}
+                onPress={() => router.push('/paywall')}
+                style={({ pressed }) => [styles.selectListPressable, pressed && styles.rowPressed]}
+              >
+                <View style={styles.row}>
+                  <View style={[styles.premiumFeatureIconWrap, { backgroundColor: `${colors.primary}18` }]}>
+                    <Sparkles color={colors.primary} size={22} strokeWidth={2} />
+                  </View>
+                  <View style={styles.rowMain}>
+                    <Text style={[styles.rowLabel, { color: colors.text }]}>
+                      {t('settingsScreen.premiumBannerTitle')}
+                    </Text>
+                    <Text style={[styles.rowHint, { color: colors.textMuted }]}>
+                      {t('settingsScreen.premiumBannerSubtitle')}
+                    </Text>
+                  </View>
+                </View>
+              </Pressable>
+              <View style={[styles.divider, { backgroundColor: colors.border }]} />
+              <View style={styles.cardBody}>
+                <Button
+                  leftIcon={<Sparkles color="#ffffff" size={20} strokeWidth={2.25} />}
+                  onPress={() => router.push('/paywall')}
+                  rightIcon={<ChevronRight color="#ffffff" size={20} strokeWidth={2.5} />}
+                  size="lg"
+                  title={t('upgrade')}
+                  variant="primary"
+                />
+              </View>
+            </>
           )}
         </View>
 
@@ -268,10 +305,6 @@ export default function SettingsScreen() {
         <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>{t('settingsScreen.more')}</Text>
         <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           <View style={styles.cardBody}>
-            <Button onPress={() => router.push('/backup')} title={t('backup.title')} variant="secondary" />
-          </View>
-          <View style={[styles.divider, { backgroundColor: colors.border }]} />
-          <View style={styles.cardBody}>
             <Button onPress={handleShowOnboardingAgain} title={t('showOnboardingAgain')} variant="secondary" />
           </View>
         </View>
@@ -320,35 +353,6 @@ export default function SettingsScreen() {
           </View>
         </View>
 
-        {!premium.isPremium ? (
-          <Pressable
-            accessibilityHint={t('settingsScreen.premiumBannerSubtitle')}
-            accessibilityLabel={t('settingsScreen.premiumBannerTitle')}
-            accessibilityRole="button"
-            onPress={() => router.push('/paywall')}
-            style={({ pressed }) => [
-              styles.premiumBanner,
-              {
-                backgroundColor: colors.surface,
-                borderColor: colors.primary,
-                opacity: pressed ? 0.92 : 1,
-              },
-            ]}
-          >
-            <View style={[styles.premiumBannerIconWrap, { backgroundColor: `${colors.primary}22` }]}>
-              <Sparkles color={colors.primary} size={26} strokeWidth={2} />
-            </View>
-            <View style={styles.premiumBannerTextCol}>
-              <Text style={[styles.premiumBannerTitle, { color: colors.text }]}>
-                {t('settingsScreen.premiumBannerTitle')}
-              </Text>
-              <Text style={[styles.premiumBannerSubtitle, { color: colors.textMuted }]}>
-                {t('settingsScreen.premiumBannerSubtitle')}
-              </Text>
-            </View>
-            <ChevronRight color={colors.textMuted} size={22} strokeWidth={2.25} />
-          </Pressable>
-        ) : null}
       </ScrollView>
     </SafeAreaView>
   );
@@ -446,33 +450,20 @@ const styles = StyleSheet.create({
   cardBody: {
     padding: 16,
   },
-  premiumBanner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 14,
-    borderRadius: 14,
-    borderWidth: 1,
-    paddingVertical: 16,
-    paddingHorizontal: 16,
-  },
-  premiumBannerIconWrap: {
-    width: 48,
-    height: 48,
-    borderRadius: 14,
+  premiumFeatureIconWrap: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
+    flexShrink: 0,
   },
-  premiumBannerTextCol: {
-    flex: 1,
-    minWidth: 0,
-    gap: 4,
-  },
-  premiumBannerTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-  },
-  premiumBannerSubtitle: {
-    fontSize: 13,
-    lineHeight: 18,
+  premiumActiveIconWrap: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
   },
 });

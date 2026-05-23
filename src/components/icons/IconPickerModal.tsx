@@ -1,4 +1,3 @@
-import { ImageOff } from "lucide-react-native";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -21,6 +20,8 @@ import {
 import { useKeyboardHeight, useTheme } from "../../hooks";
 import { ServiceIcon } from "./ServiceIcon";
 
+const INITIALS_PICKER_KEY = "__initials__";
+
 type IconPickerModalProps = {
   visible: boolean;
   selectedKey: string | null;
@@ -28,18 +29,43 @@ type IconPickerModalProps = {
   onClose: () => void;
 };
 
-type PickerItem = {
-  key: string;
-  value: string;
-  label: string;
-  entry: ServiceIconEntry;
-  searchValue: string;
+type PickerItem =
+  | {
+      kind: "initials";
+      key: typeof INITIALS_PICKER_KEY;
+      value: null;
+      label: "";
+      searchValue: "";
+    }
+  | {
+      kind: "service";
+      key: string;
+      value: string;
+      label: string;
+      entry: ServiceIconEntry;
+      searchValue: string;
+    };
+
+const INITIALS_PICKER_ITEM: PickerItem = {
+  kind: "initials",
+  key: INITIALS_PICKER_KEY,
+  value: null,
+  label: "",
+  searchValue: "",
 };
 
 const COLUMN_COUNT = 5;
 const SHEET_HORIZONTAL_PADDING = 20;
 const GRID_COLUMN_GAP = 8;
 const GRID_ROW_GAP = 8;
+const ICON_CELL_RADIUS = 12;
+/** Плитка пикера: заметный светло-серый на белом sheet (не путать с surface2 на фоне экрана). */
+const ICON_TILE_BG = {
+  light: "#F1F5F9",
+  lightSelected: "#E2E8F0",
+  dark: "#1C1C2E",
+  darkSelected: "#26263A",
+} as const;
 
 const normalizeQuery = (value: string): string => value.trim().toLowerCase();
 
@@ -50,7 +76,7 @@ export function IconPickerModal({
   onClose,
 }: IconPickerModalProps) {
   const { t } = useTranslation();
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const keyboardHeight = useKeyboardHeight(visible);
@@ -58,10 +84,10 @@ export function IconPickerModal({
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const inputRef = useRef<TextInput>(null);
   const rowInnerWidth = width - SHEET_HORIZONTAL_PADDING * 2;
-  const gapTotal = GRID_COLUMN_GAP * (COLUMN_COUNT - 1);
   const itemWidth =
     (rowInnerWidth - GRID_COLUMN_GAP * (COLUMN_COUNT - 1)) / COLUMN_COUNT;
-  const itemHeight = itemWidth + 12;
+  const itemSize = Math.floor(itemWidth);
+  const iconInnerSize = Math.max(20, Math.round(itemSize * 0.56));
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
@@ -99,6 +125,7 @@ export function IconPickerModal({
   const items = useMemo<PickerItem[]>(() => {
     const normalizedQuery = normalizeQuery(debouncedQuery);
     const serviceItems: PickerItem[] = SERVICE_REGISTRY.map((entry) => ({
+      kind: "service",
       key: entry.key,
       value: entry.key,
       label: entry.label,
@@ -107,7 +134,7 @@ export function IconPickerModal({
     }));
 
     if (!normalizedQuery) {
-      return serviceItems;
+      return [INITIALS_PICKER_ITEM, ...serviceItems];
     }
 
     return serviceItems.filter((item) =>
@@ -116,30 +143,51 @@ export function IconPickerModal({
   }, [debouncedQuery]);
 
   const renderItem = ({ item }: ListRenderItemInfo<PickerItem>) => {
-    const isSelected = item.value === selectedKey;
+    const isSelected =
+      item.kind === "initials" ? selectedKey === null : item.value === selectedKey;
+    const accessibilityLabel =
+      item.kind === "initials" ? t("iconPickerNoIcon") : item.label;
+    const tileBackground = isSelected
+      ? isDark
+        ? ICON_TILE_BG.darkSelected
+        : ICON_TILE_BG.lightSelected
+      : isDark
+        ? ICON_TILE_BG.dark
+        : ICON_TILE_BG.light;
 
     return (
       <Pressable
-        accessibilityLabel={item.label}
+        accessibilityLabel={accessibilityLabel}
         accessibilityRole="button"
         onPress={() => {
-          onSelect(item.value);
+          onSelect(item.kind === "initials" ? null : item.value);
           onClose();
         }}
         style={({ pressed }) => [
-          styles.itemCell,
+          styles.itemPressable,
           {
-            width: itemWidth,
-            height: itemHeight,
-
-            borderColor: isSelected ? colors.primary : "transparent",
-            backgroundColor: colors.background,
+            width: itemSize,
+            height: itemSize,
             opacity: pressed ? 0.75 : 1,
           },
         ]}
       >
-        <View style={styles.iconContainer}>
-          <View style={styles.iconWrap}>
+        <View
+          style={[
+            styles.iconTile,
+            {
+              width: itemSize,
+              height: itemSize,
+              borderRadius: ICON_CELL_RADIUS,
+              backgroundColor: tileBackground,
+            },
+          ]}
+        >
+          {item.kind === "initials" ? (
+            <Text style={[styles.initialsGlyph, { color: colors.textMuted, fontSize: iconInnerSize * 0.5 }]}>
+              ?
+            </Text>
+          ) : (
             <ServiceIcon
               entry={{
                 id: `icon-picker-${item.entry.key}`,
@@ -152,19 +200,21 @@ export function IconPickerModal({
                 iconKey: item.entry.key,
                 iconSource: "service",
               }}
-              size={30}
+              size={iconInnerSize}
             />
-          </View>
+          )}
         </View>
+        {/* TEMP: подписи под иконками скрыты
         <View style={styles.itemLabelWrap}>
           <Text
             ellipsizeMode="tail"
             numberOfLines={1}
             style={[styles.itemLabel, { color: colors.text }]}
           >
-            {item.label}
+            {item.label || "\u00A0"}
           </Text>
         </View>
+        */}
       </Pressable>
     );
   };
@@ -208,39 +258,6 @@ export function IconPickerModal({
             ]}
             value={query}
           />
-          <Pressable
-            accessibilityLabel={t("iconPickerNoIcon")}
-            accessibilityRole="button"
-            onPress={() => {
-              onSelect(null);
-              onClose();
-            }}
-            style={({ pressed }) => [
-              styles.noIconRow,
-              {
-                borderColor:
-                  selectedKey === null ? colors.primary : colors.border,
-                backgroundColor: colors.background,
-                opacity: pressed ? 0.75 : 1,
-              },
-            ]}
-          >
-            <View
-              style={[
-                styles.noIconIconBox,
-                { borderColor: colors.border, backgroundColor: colors.surface },
-              ]}
-            >
-              <ImageOff color={colors.textMuted} size={22} strokeWidth={2} />
-            </View>
-            <Text
-              numberOfLines={1}
-              style={[styles.noIconLabel, { color: colors.text, flex: 1 }]}
-            >
-              {t("iconPickerNoIcon")}
-            </Text>
-          </Pressable>
-
           <FlatList
             columnWrapperStyle={styles.row}
             contentContainerStyle={[
@@ -303,50 +320,16 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginBottom: GRID_ROW_GAP,
   },
-  itemCell: {
-    borderRadius: 12,
-    borderWidth: 2,
-    paddingVertical: 8,
+  itemPressable: {
+    minWidth: 0,
+  },
+  iconTile: {
     alignItems: "center",
     justifyContent: "center",
-    gap: 4,
-    minWidth: 0,
     overflow: "hidden",
   },
-  iconContainer: {
-    width: "100%",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  iconWrap: {
-    width: 38,
-    height: 38,
-    borderRadius: 10,
-    borderWidth: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  noIconRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderWidth: 2,
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 12,
-    marginBottom: 12,
-    gap: 12,
-  },
-  noIconIconBox: {
-    width: 38,
-    height: 38,
-    borderRadius: 10,
-    borderWidth: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  noIconLabel: {
-    fontSize: 15,
-    fontWeight: "600",
+  initialsGlyph: {
+    fontWeight: "700",
   },
   itemLabelWrap: {
     width: "100%",

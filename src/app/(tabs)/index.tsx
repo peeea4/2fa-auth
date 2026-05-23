@@ -14,6 +14,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { HomeEmptyLottie } from "../../components/lottie";
 import { OtpList } from "../../components/otp";
 import { Button } from "../../components/ui/Button";
 import { EmptyState } from "../../components/ui/EmptyState";
@@ -194,6 +195,7 @@ export default function HomeScreen() {
                   ? t("emptySubtitle")
                   : t("emptySearchSubtitle")
               }
+              icon={entries.length === 0 ? <HomeEmptyLottie /> : undefined}
               title={
                 entries.length === 0 ? t("emptyTitle") : t("emptySearchTitle")
               }

@@ -165,24 +165,5 @@
   "iconPickerSearch": "Поиск сервисов",
   "iconPickerNoMatch": "Совпадений не найдено",
   "iconPickerNoIcon": "Без иконки",
-  "groupedByCategoryHint": "Сгруппировано по категориям",
-  "backup": {
-    "title": "Зашифрованный бэкап",
-    "description": "Экспортируйте аккаунты в зашифрованный JSON или импортируйте их обратно с тем же паролем.",
-    "passwordLabel": "Пароль бэкапа",
-    "passwordHint": "Минимум 6 символов.",
-    "payloadLabel": "Зашифрованный payload",
-    "payloadHint": "Сохраните этот текст в безопасном месте, пароль храните отдельно.",
-    "exportCta": "Создать бэкап",
-    "importCta": "Импортировать бэкап",
-    "errorTitle": "Ошибка бэкапа",
-    "errorBody": "Не удалось обработать данные бэкапа. Проверьте пароль и payload.",
-    "exportDoneTitle": "Бэкап создан",
-    "exportDoneBody": "Зашифрованный payload готов к копированию.",
-    "importDoneTitle": "Импорт завершён",
-    "importDoneBody": "Импортировано аккаунтов: {{count}}.",
-    "importEmptyTitle": "Нечего импортировать",
-    "importEmptyBody": "Сначала вставьте зашифрованный payload.",
-    "passwordTitle": "Нужен пароль"
-  }
+  "groupedByCategoryHint": "Сгруппировано по категориям"
 }
