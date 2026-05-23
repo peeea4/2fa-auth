@@ -165,24 +165,5 @@
   "iconPickerSearch": "Rechercher un service",
   "iconPickerNoMatch": "Aucun service correspondant",
   "iconPickerNoIcon": "Sans icône",
-  "groupedByCategoryHint": "Groupé par catégorie",
-  "backup": {
-    "title": "Sauvegarde chiffrée",
-    "description": "Exportez vos comptes en JSON chiffré ou importez-les avec le même mot de passe.",
-    "passwordLabel": "Mot de passe de sauvegarde",
-    "passwordHint": "Utilisez au moins 6 caractères.",
-    "payloadLabel": "Données chiffrées",
-    "payloadHint": "Copiez ce texte dans un endroit sûr. Gardez le mot de passe séparément.",
-    "exportCta": "Créer la sauvegarde",
-    "importCta": "Importer la sauvegarde",
-    "errorTitle": "Erreur de sauvegarde",
-    "errorBody": "Impossible de traiter les données. Vérifiez le mot de passe et le contenu.",
-    "exportDoneTitle": "Sauvegarde créée",
-    "exportDoneBody": "Le contenu chiffré est prêt à être copié.",
-    "importDoneTitle": "Import terminé",
-    "importDoneBody": "{{count}} compte(s) importé(s).",
-    "importEmptyTitle": "Rien à importer",
-    "importEmptyBody": "Collez d’abord le contenu chiffré.",
-    "passwordTitle": "Mot de passe requis"
-  }
+  "groupedByCategoryHint": "Groupé par catégorie"
 }

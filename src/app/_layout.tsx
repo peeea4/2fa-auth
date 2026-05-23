@@ -87,7 +87,6 @@ export default function RootLayout() {
             <Stack.Screen name="add" options={addModalScreenOptions} />
             <Stack.Screen name="paywall" options={{ presentation: "modal" }} />
             <Stack.Screen name="edit/[id]" options={{ presentation: "modal" }} />
-            <Stack.Screen name="backup" options={{ presentation: "modal" }} />
           </Stack>
         </ThemeRoot>
       </SafeAreaProvider>

@@ -104,11 +104,20 @@ export function OtpCard({ entry, secret, onLongPress, accessibilityHint: cardAcc
       ]}
     >
       <Pressable
-        accessibilityHint={cardAccessibilityHint}
+        accessibilityHint={
+          cardAccessibilityHint
+            ? `${t('otpCard.copyHint')} ${cardAccessibilityHint}`
+            : t('otpCard.copyHint')
+        }
+        accessibilityLabel={t('otpCard.copyLabel')}
         accessibilityRole="button"
         delayLongPress={180}
+        disabled={!secret}
         onLongPress={onLongPress}
-        style={({ pressed }) => [styles.cardPressable, pressed && styles.cardPressed]}
+        onPress={() => {
+          void handleCopy();
+        }}
+        style={({ pressed }) => [styles.cardPressable, pressed && secret ? styles.cardPressed : null]}
       >
         <View style={[styles.accent, { backgroundColor: accent }]} />
 

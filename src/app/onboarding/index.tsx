@@ -13,13 +13,9 @@ export default function OnboardingScreen() {
   return (
     <SafeAreaView edges={['top', 'bottom']} style={[styles.safe, { backgroundColor: colors.background }]}>
       <OnboardingSlider
-        onAddFirstAccount={() => {
-          setOnboardingCompleted(true);
-          router.replace('/add');
-        }}
         onComplete={() => {
           setOnboardingCompleted(true);
-          router.replace('/');
+          router.replace('/paywall');
         }}
       />
     </SafeAreaView>

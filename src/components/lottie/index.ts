@@ -1,0 +1,1 @@
+export { HomeEmptyLottie } from './HomeEmptyLottie';

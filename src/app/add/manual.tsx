@@ -16,9 +16,9 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { IconPickerModal } from '../../components/icons/IconPickerModal';
 import { ServiceIcon } from '../../components/icons/ServiceIcon';
+import { OtpAdvancedSection } from '../../components/otp/OtpAdvancedSection';
 import { OtpCardPreview } from '../../components/otp/OtpCardPreview';
 import { Button } from '../../components/ui/Button';
-import { CollapsibleSection } from '../../components/ui/CollapsibleSection';
 import { Input } from '../../components/ui/Input';
 import { SectionHeader } from '../../components/ui/SectionHeader';
 import { REGISTRY_BY_KEY } from '../../constants/service-registry';
@@ -28,9 +28,6 @@ import { otpService } from '../../services/otp.service';
 import { storageService } from '../../services/storage.service';
 import { useOtpStore } from '../../stores';
 import type { OtpAlgorithm, OtpDigits, OtpEntry, OtpIconSource } from '../../types';
-
-const ALGORITHMS: OtpAlgorithm[] = ['SHA1', 'SHA256', 'SHA512'];
-const DIGITS_OPTIONS: OtpDigits[] = [6, 8];
 
 function createEntryId(): string {
   const bytes = Crypto.getRandomBytes(16);
@@ -69,8 +66,6 @@ export default function ManualEntryScreen() {
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [saveError, setSaveError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
-  const [advancedExpanded, setAdvancedExpanded] = useState(false);
-
   const handleClose = useCallback(() => {
     if (router.canGoBack()) {
       router.back();
@@ -225,8 +220,6 @@ export default function ManualEntryScreen() {
             value={group}
             variant="filled"
           />
-
-          <SectionHeader title={t('formSectionAuthentication')} />
           <Input
             autoCapitalize="characters"
             autoCorrect={false}
@@ -266,56 +259,12 @@ export default function ManualEntryScreen() {
             </View>
           </View>
 
-          <CollapsibleSection
-            expanded={advancedExpanded}
-            onToggle={() => setAdvancedExpanded((v) => !v)}
-            title={t('formSectionAdvanced')}
-          >
-            <Text style={[styles.groupLabel, { color: colors.text }]}>{t('fieldAlgorithm')}</Text>
-            <View style={styles.segmentRow}>
-              {ALGORITHMS.map((value) => {
-                const selected = algorithm === value;
-                return (
-                  <Pressable
-                    key={value}
-                    onPress={() => setAlgorithm(value)}
-                    style={[
-                      styles.segment,
-                      {
-                        borderColor: selected ? colors.primary : colors.border,
-                        backgroundColor: selected ? colors.surface : colors.background,
-                      },
-                    ]}
-                  >
-                    <Text style={[styles.segmentText, { color: selected ? colors.primary : colors.text }]}>{value}</Text>
-                  </Pressable>
-                );
-              })}
-            </View>
-            <Text style={[styles.groupLabel, { color: colors.text }]}>{t('fieldDigits')}</Text>
-            <View style={styles.segmentRow}>
-              {DIGITS_OPTIONS.map((value) => {
-                const selected = digits === value;
-                return (
-                  <Pressable
-                    key={value}
-                    onPress={() => setDigits(value)}
-                    style={[
-                      styles.segment,
-                      {
-                        borderColor: selected ? colors.primary : colors.border,
-                        backgroundColor: selected ? colors.surface : colors.background,
-                      },
-                    ]}
-                  >
-                    <Text style={[styles.segmentText, { color: selected ? colors.primary : colors.text }]}>
-                      {String(value)}
-                    </Text>
-                  </Pressable>
-                );
-              })}
-            </View>
-          </CollapsibleSection>
+          <OtpAdvancedSection
+            algorithm={algorithm}
+            digits={digits}
+            onAlgorithmChange={setAlgorithm}
+            onDigitsChange={setDigits}
+          />
         </ScrollView>
 
         <View
@@ -391,21 +340,6 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '600',
     marginTop: 4,
-  },
-  segmentRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  segment: {
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    borderRadius: 10,
-    borderWidth: 1,
-  },
-  segmentText: {
-    fontSize: 15,
-    fontWeight: '600',
   },
   iconRow: {
     flexDirection: 'row',
